@@ -1392,26 +1392,6 @@ body{
             </div>
 
 
-            <div class="panel-section">
-
-                <div class="panel-label">
-
-                    HORA
-
-                </div>
-
-
-                <div
-                    class="panel-value"
-                    id="time-status">
-
-                    DÍA
-
-                </div>
-
-            </div>
-
-
             <!-- CHAT -->
 
             <div class="panel-chat">
@@ -1697,12 +1677,6 @@ const weatherStatus =
     );
 
 
-const timeStatus =
-    document.getElementById(
-        "time-status"
-    );
-
-
 const panelChatFeed =
     document.getElementById(
         "panel-chat-feed"
@@ -1747,46 +1721,58 @@ let recentEnemyIds = [];
 ========================================================= */
 
 let audioContext = null;
+let audioUnlocked = false;
 
 
 function createAudio(){
 
+    const AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+    if(!AudioContext){
+        return false;
+    }
+
     if(!audioContext){
 
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        if(!AudioContext){
-            return;
+        try{
+            audioContext = new AudioContext();
+        }
+        catch(error){
+            console.error("AudioContext:", error);
+            return false;
         }
 
-        audioContext =
-            new AudioContext();
-
     }
 
-
-    if(
-        audioContext.state ===
-        "suspended"
-    ){
-
-        audioContext.resume();
-
+    if(audioContext.state === "suspended"){
+        audioContext.resume().catch(()=>{});
     }
 
+    audioUnlocked = true;
 
-    audioUnlock.classList.add(
-        "hidden"
-    );
+    if(audioUnlock){
+        audioUnlock.classList.add("hidden");
+    }
 
+    return true;
 }
 
 
+/*
+ * En Pogly el iframe puede iniciar sin una interacción del usuario.
+ * Cualquier clic/tap dentro del widget desbloquea el AudioContext.
+ */
+document.addEventListener(
+    "pointerdown",
+    () => createAudio(),
+    {passive:true}
+);
+
 audioUnlock.addEventListener(
     "click",
-    createAudio
+    () => createAudio()
 );
 
 
@@ -1798,7 +1784,7 @@ function tone(
     delay=0
 ){
 
-    if(!audioContext){
+    if(!audioContext || !audioUnlocked){
         return;
     }
 
@@ -2191,10 +2177,6 @@ function fallbackWeather(){
         getTimeOfDay();
 
 
-    timeStatus.textContent =
-        time.name;
-
-
     if(
         time.id ===
         "night"
@@ -2414,10 +2396,6 @@ async function updateWeather(){
 
     const time =
         getTimeOfDay();
-
-
-    timeStatus.textContent =
-        time.name;
 
 
     if(
