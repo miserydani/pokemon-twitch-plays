@@ -979,7 +979,7 @@ body{
         brightness(1.25);
 
     transform:
-        scale(1.025);
+        scale(1.025;
 
 }
 
@@ -1486,120 +1486,100 @@ const background =
         "background"
     );
 
-
 const enemyName =
     document.getElementById(
         "enemyName"
     );
-
 
 const enemyLevel =
     document.getElementById(
         "enemyLevel"
     );
 
-
 const enemyHp =
     document.getElementById(
         "enemyHp"
     );
-
 
 const enemyHpNumber =
     document.getElementById(
         "enemyHpNumber"
     );
 
-
 const enemyImg =
     document.getElementById(
         "enemyImg"
     );
-
 
 const playerName =
     document.getElementById(
         "playerName"
     );
 
-
 const playerLevel =
     document.getElementById(
         "playerLevel"
     );
-
 
 const playerHp =
     document.getElementById(
         "playerHp"
     );
 
-
 const playerHpNumber =
     document.getElementById(
         "playerHpNumber"
     );
-
 
 const playerImg =
     document.getElementById(
         "playerImg"
     );
 
-
 const battleMessage =
     document.getElementById(
         "battleMessage"
     );
-
 
 const battleMessage2 =
     document.getElementById(
         "battleMessage2"
     );
 
-
 const playersCount =
     document.getElementById(
         "playersCount"
     );
-
 
 const chatFeed =
     document.getElementById(
         "chatFeed"
     );
 
-
 const weatherText =
     document.getElementById(
         "weatherText"
     );
-
 
 const connectionStatus =
     document.getElementById(
         "connectionStatus"
     );
 
-
 const fightButton =
     document.getElementById(
         "fightButton"
     );
-
 
 const bagButton =
     document.getElementById(
         "bagButton"
     );
 
-
 const pokemonButton =
     document.getElementById(
         "pokemonButton"
     );
-
 
 const runButton =
     document.getElementById(
@@ -1608,7 +1588,7 @@ const runButton =
 
 
 /* =========================================================
-   VARIABLES DEL JUEGO
+   VARIABLES
 ========================================================= */
 
 let enemy = {
@@ -1666,7 +1646,6 @@ const items = {
 const API =
     "https://pokeapi.co/api/v2/pokemon/";
 
-
 const SPRITE =
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
 
@@ -1682,13 +1661,11 @@ function loadSprite(
         id +
         ".png";
 
-
     const backside =
         SPRITE +
         "back/" +
         id +
         ".png";
-
 
     img.src =
         back
@@ -1716,7 +1693,6 @@ async function getRandomPokemon(){
             await fetch(
                 API + id
             );
-
 
         const data =
             await response.json();
@@ -2658,20 +2634,11 @@ function processCommand(
             .toLowerCase();
 
 
-    /*
-       TODO mensaje aparece
-       en el chat visual.
-    */
-
     addChat(
         user,
         message
     );
 
-
-    /*
-       Contar usuarios.
-    */
 
     users.add(
         user
@@ -2682,11 +2649,6 @@ function processCommand(
         users.size;
 
 
-    /*
-       Solo comandos empiezan
-       con !
-    */
-
     if(
         !command.startsWith("!")
     ){
@@ -2695,10 +2657,6 @@ function processCommand(
 
     }
 
-
-    /*
-       Cooldown global.
-    */
 
     const now =
         Date.now();
@@ -2851,9 +2809,7 @@ function connectTwitch(){
 
 
     connectionStatus.textContent =
-        insideIframe
-            ? "● CONECTANDO TWITCH · IFRAME"
-            : "● CONECTANDO TWITCH...";
+        "● CONECTANDO TWITCH...";
 
 
     connectionStatus.className =
@@ -2861,7 +2817,7 @@ function connectTwitch(){
 
 
     /*
-       UNA SOLA conexión TMI.
+       UNA SOLA CONEXIÓN TMI
     */
 
     const client =
@@ -2972,7 +2928,7 @@ function connectTwitch(){
 
 
     /*
-       MENSAJES DEL CHAT
+       MENSAJES
     */
 
     client.on(
@@ -3019,7 +2975,9 @@ function connectTwitch(){
             );
 
 
-            if(self){
+            if(
+                self
+            ){
 
                 return;
 
@@ -3116,7 +3074,7 @@ function connectTwitch(){
 
 
     /*
-       CONECTAR
+       CONEXIÓN INMEDIATA
     */
 
     console.log(
@@ -3166,7 +3124,6 @@ function connectTwitch(){
 
 const WEATHER_LAT =
     19.4326;
-
 
 const WEATHER_LON =
     -99.1332;
@@ -3370,15 +3327,25 @@ async function updateWeather(){
 async function start(){
 
     /*
-       Clima inicial.
+       IMPORTANTE:
+       Twitch se conecta PRIMERO.
+       No esperamos a PokeAPI.
+    */
+
+    console.log(
+        "Iniciando conexión de Twitch..."
+    );
+
+
+    connectTwitch();
+
+
+    /*
+       CLIMA
     */
 
     fallbackWeather();
 
-
-    /*
-       Actualizar clima.
-    */
 
     updateWeather();
 
@@ -3390,53 +3357,17 @@ async function start(){
 
 
     /*
-       Equipo.
+       CARGAR EQUIPO
     */
 
     await initTeam();
 
 
     /*
-       Enemigo.
+       CARGAR ENEMIGO
     */
 
     await newEnemy();
-
-
-    /*
-       Twitch.
-       Si Pogly lo carga como iframe,
-       esperamos un poco antes de conectar.
-    */
-
-    if(
-        window.self !== window.top
-    ){
-
-        console.log(
-            "Pogly iframe detectado."
-        );
-
-
-        setTimeout(
-            ()=>{
-                connectTwitch();
-            },
-            1500
-        );
-
-    }
-
-    else{
-
-        console.log(
-            "Página directa detectada."
-        );
-
-
-        connectTwitch();
-
-    }
 
 }
 
