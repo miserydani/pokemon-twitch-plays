@@ -1,1 +1,2708 @@
+<!DOCTYPE html>
+<html lang="es">
 
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0">
+
+<script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
+
+<style>
+
+/* =========================================================
+   BASE
+========================================================= */
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:transparent;
+    font-family:'Courier New',monospace;
+}
+
+.battle{
+    position:relative;
+
+    width:800px;
+    height:500px;
+
+    overflow:hidden;
+
+    background:#69cce3;
+
+    color:#17232b;
+}
+
+
+/* =========================================================
+   FONDO DEL ESCENARIO
+========================================================= */
+
+.background{
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:365px;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            #51c8e1 0%,
+            #91dfe0 42%,
+            #b7e59b 72%,
+            #6cc66a 100%
+        );
+}
+
+
+/* NUBES */
+
+.cloud{
+    position:absolute;
+
+    background:rgba(255,255,255,.7);
+
+    border-radius:50%;
+
+    filter:blur(1px);
+}
+
+.c1{
+    width:130px;
+    height:38px;
+
+    top:42px;
+    left:100px;
+}
+
+.c2{
+    width:170px;
+    height:45px;
+
+    top:75px;
+    right:300px;
+}
+
+
+/* MONTAÑAS */
+
+.mountain{
+    position:absolute;
+
+    bottom:108px;
+
+    width:0;
+    height:0;
+
+    border-left:130px solid transparent;
+    border-right:130px solid transparent;
+    border-bottom:145px solid #7bb4b0;
+
+    opacity:.8;
+}
+
+.m1{
+    left:100px;
+}
+
+.m2{
+    left:320px;
+
+    border-bottom-color:#69aaa8;
+}
+
+
+/* ÁRBOLES */
+
+.trees{
+    position:absolute;
+
+    bottom:105px;
+
+    width:150px;
+    height:155px;
+
+    background:
+        radial-gradient(
+            circle at 50% 25%,
+            #4f9b4c 0 40%,
+            transparent 41%
+        ),
+        radial-gradient(
+            circle at 25% 45%,
+            #3d8744 0 37%,
+            transparent 38%
+        ),
+        radial-gradient(
+            circle at 75% 48%,
+            #438e43 0 40%,
+            transparent 41%
+        );
+}
+
+.trees.left{
+    left:-25px;
+}
+
+.trees.right{
+    right:245px;
+}
+
+
+/* SUELO */
+
+.ground{
+    position:absolute;
+
+    bottom:0;
+    left:0;
+
+    width:585px;
+    height:175px;
+
+    background:
+        repeating-linear-gradient(
+            168deg,
+            #78ca65 0 9px,
+            #63b95b 9px 14px,
+            #91d36d 14px 20px
+        );
+}
+
+
+/* CAMINO */
+
+.path{
+    position:absolute;
+
+    left:135px;
+    bottom:0;
+
+    width:300px;
+    height:130px;
+
+    background:#d5bd7c;
+
+    transform:
+        perspective(300px)
+        rotateX(35deg);
+
+    opacity:.7;
+}
+
+
+/* PASTO */
+
+.grass-patch{
+    position:absolute;
+
+    background:#5eaf54;
+
+    border:3px solid #3d753b;
+
+    border-radius:50%;
+
+    box-shadow:
+        inset 0 -8px 0 #4b9545;
+}
+
+.enemy-grass{
+    width:340px;
+    height:82px;
+
+    right:12px;
+    bottom:82px;
+}
+
+.player-grass{
+    width:350px;
+    height:84px;
+
+    left:5px;
+    bottom:18px;
+}
+
+
+/* =========================================================
+   POKÉMON
+========================================================= */
+
+.pokemon{
+    position:absolute;
+
+    z-index:5;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+}
+
+.pokemon img{
+    image-rendering:pixelated;
+
+    object-fit:contain;
+
+    filter:
+        drop-shadow(
+            5px 7px 0 rgba(0,0,0,.22)
+        );
+
+    animation:
+        float 2.4s ease-in-out infinite;
+}
+
+
+/*
+   ENEMIGO
+
+   Más arriba para que quede
+   completamente visible.
+*/
+
+.enemy-pokemon{
+
+    width:250px;
+    height:250px;
+
+    right:55px;
+    top:70px;
+}
+
+.enemy-pokemon img{
+
+    width:235px;
+    height:235px;
+
+    max-width:235px;
+    max-height:235px;
+}
+
+
+/*
+   JUGADOR
+
+   Subido bastante para que
+   no quede detrás del menú.
+*/
+
+.player-pokemon{
+
+    width:250px;
+    height:250px;
+
+    left:45px;
+    bottom:125px;
+}
+
+.player-pokemon img{
+
+    width:235px;
+    height:235px;
+
+    max-width:235px;
+    max-height:235px;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status{
+
+    position:absolute;
+
+    z-index:10;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f1f1f1 55%,
+            #d2d2d2 100%
+        );
+
+    border:4px solid #26343b;
+
+    border-radius:5px;
+
+    box-shadow:
+        inset 0 0 0 3px #ffffff,
+        6px 6px 0 rgba(0,0,0,.25);
+
+    padding:9px 13px;
+}
+
+
+/* STATUS ENEMIGO */
+
+.enemy-status{
+
+    left:22px;
+    top:25px;
+
+    width:310px;
+    height:105px;
+}
+
+
+/* STATUS JUGADOR */
+
+.player-status{
+
+    left:285px;
+    bottom:175px;
+
+    width:270px;
+    height:108px;
+}
+
+
+/* NOMBRE */
+
+.status-name{
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    font-size:20px;
+
+    font-weight:bold;
+}
+
+
+/* HP */
+
+.hp-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    font-weight:bold;
+}
+
+.hp-row span{
+    color:#e0a400;
+}
+
+.hp-bar{
+
+    height:14px;
+
+    flex:1;
+
+    background:#343434;
+
+    border:2px solid #202020;
+
+    border-radius:5px;
+
+    overflow:hidden;
+}
+
+.hp-fill{
+
+    height:100%;
+
+    width:100%;
+
+    background:#39b94a;
+
+    transition:
+        width .35s ease,
+        background .35s ease;
+}
+
+.hp-number{
+
+    text-align:right;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    margin-top:3px;
+}
+
+
+/* =========================================================
+   PANEL LATERAL
+========================================================= */
+
+.side-panel{
+
+    position:absolute;
+
+    right:7px;
+    top:10px;
+
+    width:212px;
+    height:350px;
+
+    background:
+        rgba(22,43,52,.96);
+
+    border:4px solid #29434d;
+
+    box-shadow:
+        inset 0 0 0 2px #6d9198,
+        5px 5px 0 rgba(0,0,0,.25);
+
+    z-index:20;
+
+    color:#fff;
+
+    padding:11px;
+}
+
+.side-heading{
+
+    font-size:12px;
+
+    color:#77d6eb;
+
+    font-weight:bold;
+
+    letter-spacing:.5px;
+}
+
+.zone{
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    margin-top:3px;
+}
+
+.separator{
+
+    height:2px;
+
+    background:#567078;
+
+    margin:8px 0;
+}
+
+.weather{
+
+    font-size:14px;
+
+    color:#ffdd6b;
+}
+
+.players{
+
+    font-size:23px;
+
+    font-weight:bold;
+}
+
+.fake-chat{
+
+    font-size:11px;
+
+    line-height:18px;
+
+    margin-top:5px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+}
+
+.fake-chat div{
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+
+/* =========================================================
+   MENÚ INFERIOR
+========================================================= */
+
+.battle-menu{
+
+    position:absolute;
+
+    left:0;
+    bottom:0;
+
+    width:100%;
+    height:150px;
+
+    background:#27333b;
+
+    border-top:5px solid #111b21;
+
+    z-index:30;
+
+    padding:11px;
+
+    display:flex;
+
+    gap:14px;
+}
+
+
+/* MENSAJE */
+
+.question{
+
+    position:relative;
+
+    width:390px;
+    height:125px;
+
+    background:#f7f7f7;
+
+    border:5px solid #29333b;
+
+    box-shadow:
+        inset 0 0 0 3px #c6b173,
+        5px 5px 0 #111b21;
+
+    border-radius:5px;
+
+    padding:18px 22px;
+
+    font-size:25px;
+
+    line-height:34px;
+
+    font-weight:bold;
+}
+
+.cursor{
+
+    position:absolute;
+
+    right:16px;
+    bottom:8px;
+
+    font-size:20px;
+}
+
+
+/* BOTONES */
+
+.buttons{
+
+    width:275px;
+    height:125px;
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    grid-template-rows:1fr 1fr;
+
+    gap:8px;
+}
+
+.battle-button{
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:4px solid #26313a;
+
+    box-shadow:
+        inset 0 0 0 2px rgba(255,255,255,.65),
+        3px 3px 0 #111b21;
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    text-shadow:
+        2px 2px #333;
+
+    transition:
+        filter .12s ease,
+        transform .12s ease,
+        outline .12s ease,
+        box-shadow .12s ease;
+}
+
+.fight{
+    background:#df6868;
+}
+
+.bag{
+    background:#d8ae53;
+}
+
+.pokemon-button{
+    background:#5da85a;
+}
+
+.run{
+    background:#5a8fc5;
+}
+
+
+/*
+   NINGÚN BOTÓN ESTÁ
+   SELECCIONADO AL INICIO
+*/
+
+.battle-button.active{
+
+    outline:4px solid white;
+
+    filter:brightness(1.25);
+
+    transform:scale(1.025);
+
+    box-shadow:
+        inset 0 0 0 2px rgba(255,255,255,.9),
+        4px 4px 0 #111b21;
+}
+
+
+/* =========================================================
+   ESTADO TWITCH
+========================================================= */
+
+#connectionStatus{
+
+    position:absolute;
+
+    right:225px;
+    top:365px;
+
+    z-index:50;
+
+    color:#fff;
+
+    font-size:9px;
+
+    background:
+        rgba(0,0,0,.7);
+
+    padding:5px 8px;
+
+    border-radius:3px;
+}
+
+#connectionStatus.ok{
+    color:#65ff73;
+}
+
+#connectionStatus.error{
+    color:#ff6262;
+}
+
+
+/* =========================================================
+   DAÑO
+========================================================= */
+
+.damage{
+
+    position:absolute;
+
+    z-index:60;
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    color:#fff;
+
+    text-shadow:
+        3px 3px 0 #000;
+
+    animation:
+        damage .8s forwards;
+
+    pointer-events:none;
+}
+
+.enemy-damage{
+
+    right:145px;
+    top:135px;
+}
+
+.player-damage{
+
+    left:150px;
+    bottom:225px;
+}
+
+
+/* =========================================================
+   ANIMACIONES
+========================================================= */
+
+@keyframes damage{
+
+    0%{
+        opacity:0;
+
+        transform:
+            translateY(15px)
+            scale(.7);
+    }
+
+    20%{
+        opacity:1;
+
+        transform:
+            translateY(0)
+            scale(1.2);
+    }
+
+    100%{
+        opacity:0;
+
+        transform:
+            translateY(-35px)
+            scale(1);
+    }
+
+}
+
+
+@keyframes float{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-7px);
+    }
+
+}
+
+
+@keyframes appear{
+
+    0%{
+        opacity:0;
+
+        transform:
+            scale(.1);
+    }
+
+    70%{
+        opacity:1;
+
+        transform:
+            scale(1.08);
+    }
+
+    100%{
+        opacity:1;
+
+        transform:
+            scale(1);
+    }
+
+}
+
+.appear{
+
+    animation:
+        appear .65s ease-out;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="battle">
+
+
+<!-- =====================================================
+     FONDO
+====================================================== -->
+
+<div class="background">
+
+    <div class="cloud c1"></div>
+
+    <div class="cloud c2"></div>
+
+    <div class="mountain m1"></div>
+
+    <div class="mountain m2"></div>
+
+    <div class="trees left"></div>
+
+    <div class="trees right"></div>
+
+    <div class="ground"></div>
+
+    <div class="path"></div>
+
+    <div class="grass-patch enemy-grass"></div>
+
+    <div class="grass-patch player-grass"></div>
+
+</div>
+
+
+<!-- =====================================================
+     STATUS ENEMIGO
+====================================================== -->
+
+<div class="enemy-status status">
+
+    <div class="status-name">
+
+        <span id="enemyName">
+            CARGANDO...
+        </span>
+
+        <span>
+
+            Lv.
+
+            <b id="enemyLevel">
+                18
+            </b>
+
+        </span>
+
+    </div>
+
+
+    <div class="hp-row">
+
+        <span>
+            HP
+        </span>
+
+        <div class="hp-bar">
+
+            <div
+                id="enemyHp"
+                class="hp-fill">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="hp-number"
+        id="enemyHpNumber">
+
+        100/100
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ENEMIGO
+====================================================== -->
+
+<div class="enemy-pokemon pokemon">
+
+    <img
+        id="enemyImg"
+        src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/448.png">
+
+</div>
+
+
+<!-- =====================================================
+     JUGADOR
+====================================================== -->
+
+<div class="player-pokemon pokemon">
+
+    <img
+        id="playerImg"
+        src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/25.png">
+
+</div>
+
+
+<!-- =====================================================
+     STATUS JUGADOR
+====================================================== -->
+
+<div class="player-status status">
+
+    <div class="status-name">
+
+        <span id="playerName">
+            PIKACHU
+        </span>
+
+        <span>
+
+            Lv.
+
+            <b id="playerLevel">
+                12
+            </b>
+
+        </span>
+
+    </div>
+
+
+    <div class="hp-row">
+
+        <span>
+            HP
+        </span>
+
+        <div class="hp-bar">
+
+            <div
+                id="playerHp"
+                class="hp-fill">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="hp-number"
+        id="playerHpNumber">
+
+        100/100
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PANEL LATERAL
+====================================================== -->
+
+<div class="side-panel">
+
+
+    <div class="side-heading">
+        ZONA ACTUAL
+    </div>
+
+    <div class="zone">
+        RUTA 1
+    </div>
+
+
+    <div class="separator"></div>
+
+
+    <div class="side-heading">
+        CLIMA
+    </div>
+
+    <div class="weather">
+        ☀ &nbsp;SOLEADO
+    </div>
+
+
+    <div class="separator"></div>
+
+
+    <div class="side-heading">
+        JUGADORES
+    </div>
+
+    <div
+        class="players"
+        id="playersCount">
+
+        0
+
+    </div>
+
+
+    <div class="separator"></div>
+
+
+    <div class="side-heading">
+        ÚLTIMOS COMANDOS
+    </div>
+
+
+    <div
+        class="fake-chat"
+        id="chatFeed">
+
+        <div>
+            ESPERANDO AL CHAT...
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     MENÚ
+====================================================== -->
+
+<div class="battle-menu">
+
+
+    <div class="question">
+
+        <span id="battleMessage">
+            ¿Qué hará
+        </span>
+
+        <br>
+
+        <span id="battleMessage2">
+            el chat?
+        </span>
+
+        <span class="cursor">
+            ▼
+        </span>
+
+    </div>
+
+
+    <div class="buttons">
+
+
+        <div
+            id="fightButton"
+            class="battle-button fight">
+
+            ▶ FIGHT
+
+        </div>
+
+
+        <div
+            id="bagButton"
+            class="battle-button bag">
+
+            BAG
+
+        </div>
+
+
+        <div
+            id="pokemonButton"
+            class="battle-button pokemon-button">
+
+            POKÉMON
+
+        </div>
+
+
+        <div
+            id="runButton"
+            class="battle-button run">
+
+            RUN
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     TWITCH
+====================================================== -->
+
+<div id="connectionStatus">
+
+    ● CONECTANDO TWITCH...
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const CHANNEL =
+    "rubius";
+
+
+const COMMAND_COOLDOWN =
+    650;
+
+
+let lastCommand =
+    0;
+
+
+let activeTimer =
+    null;
+
+
+/* =========================================================
+   POKÉMON
+========================================================= */
+
+let enemy = {
+
+    id:448,
+
+    name:"LUCARIO",
+
+    level:18,
+
+    hp:100,
+
+    maxHp:100
+
+};
+
+
+let player = {
+
+    id:25,
+
+    name:"PIKACHU",
+
+    level:12,
+
+    hp:100,
+
+    maxHp:100
+
+};
+
+
+let team=[];
+
+let teamIndex=0;
+
+let users =
+    new Set();
+
+
+let items={
+
+    potion:3,
+
+    pokeball:3
+
+};
+
+
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+
+const enemyImg =
+    document.getElementById(
+        "enemyImg"
+    );
+
+
+const enemyName =
+    document.getElementById(
+        "enemyName"
+    );
+
+
+const enemyLevel =
+    document.getElementById(
+        "enemyLevel"
+    );
+
+
+const enemyHp =
+    document.getElementById(
+        "enemyHp"
+    );
+
+
+const enemyHpNumber =
+    document.getElementById(
+        "enemyHpNumber"
+    );
+
+
+const playerImg =
+    document.getElementById(
+        "playerImg"
+    );
+
+
+const playerName =
+    document.getElementById(
+        "playerName"
+    );
+
+
+const playerLevel =
+    document.getElementById(
+        "playerLevel"
+    );
+
+
+const playerHp =
+    document.getElementById(
+        "playerHp"
+    );
+
+
+const playerHpNumber =
+    document.getElementById(
+        "playerHpNumber"
+    );
+
+
+const playersCount =
+    document.getElementById(
+        "playersCount"
+    );
+
+
+const chatFeed =
+    document.getElementById(
+        "chatFeed"
+    );
+
+
+const battleMessage =
+    document.getElementById(
+        "battleMessage"
+    );
+
+
+const battleMessage2 =
+    document.getElementById(
+        "battleMessage2"
+    );
+
+
+const connectionStatus =
+    document.getElementById(
+        "connectionStatus"
+    );
+
+
+const fightButton =
+    document.getElementById(
+        "fightButton"
+    );
+
+
+const bagButton =
+    document.getElementById(
+        "bagButton"
+    );
+
+
+const pokemonButton =
+    document.getElementById(
+        "pokemonButton"
+    );
+
+
+const runButton =
+    document.getElementById(
+        "runButton"
+    );
+
+
+/* =========================================================
+   HP
+========================================================= */
+
+function setHpBar(
+    element,
+    hp,
+    max
+){
+
+    const percent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                hp/max*100
+            )
+        );
+
+
+    element.style.width =
+        percent+"%";
+
+
+    if(
+        percent<=25
+    ){
+
+        element.style.background =
+            "#e84b4b";
+
+    }
+
+    else if(
+        percent<=50
+    ){
+
+        element.style.background =
+            "#e7c33e";
+
+    }
+
+    else{
+
+        element.style.background =
+            "#39b94a";
+
+    }
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR UI
+========================================================= */
+
+function updateUI(){
+
+    enemyName.textContent =
+        enemy.name;
+
+
+    enemyLevel.textContent =
+        enemy.level;
+
+
+    enemyHpNumber.textContent =
+        Math.max(
+            0,
+            enemy.hp
+        )
+        +
+        "/"
+        +
+        enemy.maxHp;
+
+
+    setHpBar(
+        enemyHp,
+        enemy.hp,
+        enemy.maxHp
+    );
+
+
+    playerName.textContent =
+        player.name;
+
+
+    playerLevel.textContent =
+        player.level;
+
+
+    playerHpNumber.textContent =
+        Math.max(
+            0,
+            player.hp
+        )
+        +
+        "/"
+        +
+        player.maxHp;
+
+
+    setHpBar(
+        playerHp,
+        player.hp,
+        player.maxHp
+    );
+
+
+    playersCount.textContent =
+        users.size;
+
+}
+
+
+/* =========================================================
+   SPRITES
+========================================================= */
+
+function loadSprite(
+    img,
+    id,
+    back=false
+){
+
+    img.src =
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
+        +
+        (
+            back
+            ?
+            "back/"
+            :
+            ""
+        )
+        +
+        id
+        +
+        ".png";
+
+}
+
+
+/* =========================================================
+   POKEAPI
+========================================================= */
+
+async function getPokemon(
+    id
+){
+
+    try{
+
+        const response =
+            await fetch(
+                "https://pokeapi.co/api/v2/pokemon/"
+                +
+                id
+            );
+
+
+        const data =
+            await response.json();
+
+
+        return {
+
+            id:data.id,
+
+            name:
+                data.name.toUpperCase(),
+
+            level:
+                Math.floor(
+                    Math.random()*20
+                )+5
+
+        };
+
+    }
+
+    catch(error){
+
+        return {
+
+            id:id,
+
+            name:
+                "POKEMON #"+id,
+
+            level:10
+
+        };
+
+    }
+
+}
+
+
+/* =========================================================
+   NUEVO ENEMIGO
+========================================================= */
+
+async function newEnemy(){
+
+    const id =
+        Math.floor(
+            Math.random()*1025
+        )+1;
+
+
+    const pokemon =
+        await getPokemon(id);
+
+
+    enemy={
+
+        id:pokemon.id,
+
+        name:pokemon.name,
+
+        level:pokemon.level,
+
+        maxHp:
+            80+
+            pokemon.level*4,
+
+        hp:
+            80+
+            pokemon.level*4
+
+    };
+
+
+    loadSprite(
+        enemyImg,
+        enemy.id,
+        false
+    );
+
+
+    enemyImg.classList.remove(
+        "appear"
+    );
+
+
+    void enemyImg.offsetWidth;
+
+
+    enemyImg.classList.add(
+        "appear"
+    );
+
+
+    battleMessage.textContent =
+        "¡NUEVO ENEMIGO!";
+
+
+    battleMessage2.textContent =
+        enemy.name;
+
+
+    updateUI();
+
+}
+
+
+/* =========================================================
+   EQUIPO
+========================================================= */
+
+async function initTeam(){
+
+    const ids=[];
+
+
+    while(
+        ids.length<3
+    ){
+
+        const id =
+            Math.floor(
+                Math.random()*1025
+            )+1;
+
+
+        if(
+            !ids.includes(id)
+        ){
+
+            ids.push(id);
+
+        }
+
+    }
+
+
+    for(
+        const id of ids
+    ){
+
+        team.push(
+            await getPokemon(id)
+        );
+
+    }
+
+
+    player =
+        Object.assign(
+            {},
+            team[0],
+            {
+                maxHp:100,
+                hp:100
+            }
+        );
+
+
+    loadSprite(
+        playerImg,
+        player.id,
+        true
+    );
+
+
+    updateUI();
+
+}
+
+
+/* =========================================================
+   DAÑO
+========================================================= */
+
+function showDamage(
+    amount,
+    target
+){
+
+    const damage =
+        document.createElement(
+            "div"
+        );
+
+
+    damage.className =
+        "damage "
+        +
+        (
+            target==="enemy"
+            ?
+            "enemy-damage"
+            :
+            "player-damage"
+        );
+
+
+    damage.textContent =
+        "-"+amount;
+
+
+    document
+        .querySelector(
+            ".battle"
+        )
+        .appendChild(
+            damage
+        );
+
+
+    setTimeout(
+        ()=>{
+            damage.remove();
+        },
+        850
+    );
+
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+function addChat(
+    user,
+    message
+){
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.innerHTML =
+        '<span style="color:#63d9ff">@'
+        +
+        user
+        +
+        "</span> "
+        +
+        escapeHtml(
+            message
+        );
+
+
+    chatFeed.prepend(
+        row
+    );
+
+
+    while(
+        chatFeed.children.length>6
+    ){
+
+        chatFeed.removeChild(
+            chatFeed.lastChild
+        );
+
+    }
+
+}
+
+
+function escapeHtml(
+    text
+){
+
+    return String(text)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+function clearButtons(){
+
+    fightButton.classList.remove(
+        "active"
+    );
+
+    bagButton.classList.remove(
+        "active"
+    );
+
+    pokemonButton.classList.remove(
+        "active"
+    );
+
+    runButton.classList.remove(
+        "active"
+    );
+
+}
+
+
+function highlightCommand(
+    command
+){
+
+    clearTimeout(
+        activeTimer
+    );
+
+
+    clearButtons();
+
+
+    const c =
+        command
+        .toLowerCase()
+        .trim();
+
+
+    let button=null;
+
+
+    if(
+        c==="!fight" ||
+        c==="!f"
+    ){
+
+        button =
+            fightButton;
+
+    }
+
+
+    else if(
+        c==="!bag" ||
+        c==="!item" ||
+        c==="!potion" ||
+        c==="!catch" ||
+        c==="!pokeball"
+    ){
+
+        button =
+            bagButton;
+
+    }
+
+
+    else if(
+        c==="!pokemon" ||
+        c==="!poke"
+    ){
+
+        button =
+            pokemonButton;
+
+    }
+
+
+    else if(
+        c==="!run" ||
+        c==="!escape"
+    ){
+
+        button =
+            runButton;
+
+    }
+
+
+    if(button){
+
+        button.classList.add(
+            "active"
+        );
+
+
+        activeTimer =
+            setTimeout(
+                ()=>{
+                    button.classList.remove(
+                        "active"
+                    );
+                },
+                900
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   ATAQUE ENEMIGO
+========================================================= */
+
+function enemyAttack(){
+
+    if(
+        enemy.hp<=0
+    ){
+
+        return;
+
+    }
+
+
+    const damage =
+        Math.floor(
+            Math.random()*10
+        )+5;
+
+
+    player.hp =
+        Math.max(
+            0,
+            player.hp-damage
+        );
+
+
+    showDamage(
+        damage,
+        "player"
+    );
+
+
+    updateUI();
+
+
+    if(
+        player.hp<=0
+    ){
+
+        battleMessage.textContent =
+            player.name+
+            " HA CAÍDO";
+
+
+        battleMessage2.textContent =
+            "!pokemon PARA CAMBIAR";
+
+    }
+
+    else{
+
+        battleMessage.textContent =
+            enemy.name+
+            " ATACA";
+
+
+        battleMessage2.textContent =
+            "-"+
+            damage+
+            " HP";
+
+    }
+
+}
+
+
+/* =========================================================
+   FIGHT
+========================================================= */
+
+function fight(
+    user
+){
+
+    if(
+        enemy.hp<=0
+    ){
+
+        return;
+
+    }
+
+
+    const damage =
+        Math.floor(
+            Math.random()*16
+        )+8;
+
+
+    enemy.hp =
+        Math.max(
+            0,
+            enemy.hp-damage
+        );
+
+
+    showDamage(
+        damage,
+        "enemy"
+    );
+
+
+    battleMessage.textContent =
+        "@"+
+        user+
+        " USA FIGHT";
+
+
+    battleMessage2.textContent =
+        player.name+
+        " -"+
+        damage+
+        " HP";
+
+
+    updateUI();
+
+
+    if(
+        enemy.hp<=0
+    ){
+
+        battleMessage.textContent =
+            "¡"+
+            enemy.name+
+            " DERROTADO!";
+
+
+        battleMessage2.textContent =
+            "NUEVO ENEMIGO...";
+
+
+        setTimeout(
+            newEnemy,
+            1500
+        );
+
+
+        return;
+
+    }
+
+
+    setTimeout(
+        enemyAttack,
+        500
+    );
+
+}
+
+
+/* =========================================================
+   BAG
+========================================================= */
+
+function useBag(
+    user
+){
+
+    if(
+        items.potion<=0
+    ){
+
+        battleMessage.textContent =
+            "¡NO QUEDAN POCIONES!";
+
+        battleMessage2.textContent =
+            "";
+
+        return;
+
+    }
+
+
+    if(
+        player.hp>=player.maxHp
+    ){
+
+        battleMessage.textContent =
+            "HP YA ESTÁ LLENO";
+
+        battleMessage2.textContent =
+            "";
+
+        return;
+
+    }
+
+
+    items.potion--;
+
+
+    const heal =
+        Math.min(
+            30,
+            player.maxHp-player.hp
+        );
+
+
+    player.hp +=
+        heal;
+
+
+    updateUI();
+
+
+    battleMessage.textContent =
+        "@"+
+        user+
+        " USA POTION";
+
+
+    battleMessage2.textContent =
+        "+"+
+        heal+
+        " HP";
+
+
+    setTimeout(
+        enemyAttack,
+        500
+    );
+
+}
+
+
+/* =========================================================
+   CAMBIAR POKÉMON
+========================================================= */
+
+function changePokemon(
+    user
+){
+
+    if(
+        team.length===0
+    ){
+
+        return;
+
+    }
+
+
+    teamIndex =
+        (
+            teamIndex+1
+        )
+        %
+        team.length;
+
+
+    player =
+        Object.assign(
+            {},
+            team[teamIndex],
+            {
+                maxHp:100,
+                hp:100
+            }
+        );
+
+
+    loadSprite(
+        playerImg,
+        player.id,
+        true
+    );
+
+
+    updateUI();
+
+
+    battleMessage.textContent =
+        "@"+
+        user+
+        " CAMBIA A";
+
+
+    battleMessage2.textContent =
+        player.name;
+
+
+    setTimeout(
+        enemyAttack,
+        500
+    );
+
+}
+
+
+/* =========================================================
+   CAPTURAR
+========================================================= */
+
+function catchPokemon(
+    user
+){
+
+    if(
+        items.pokeball<=0
+    ){
+
+        battleMessage.textContent =
+            "¡NO QUEDAN POKÉBALLS!";
+
+        battleMessage2.textContent =
+            "";
+
+        return;
+
+    }
+
+
+    items.pokeball--;
+
+
+    const chance =
+        0.2+
+        (
+            1-
+            enemy.hp/enemy.maxHp
+        )*
+        0.6;
+
+
+    if(
+        Math.random()<chance
+    ){
+
+        battleMessage.textContent =
+            "¡POKÉMON CAPTURADO!";
+
+
+        battleMessage2.textContent =
+            "@"+
+            user+
+            " ATRAPÓ "+
+            enemy.name;
+
+
+        setTimeout(
+            newEnemy,
+            1600
+        );
+
+    }
+
+    else{
+
+        battleMessage.textContent =
+            "¡SE ESCAPÓ!";
+
+
+        battleMessage2.textContent =
+            "@"+
+            user+
+            " FALLÓ";
+
+
+        setTimeout(
+            enemyAttack,
+            500
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RUN
+========================================================= */
+
+function run(
+    user
+){
+
+    battleMessage.textContent =
+        "@"+
+        user+
+        " INTENTA ESCAPAR";
+
+
+    battleMessage2.textContent =
+        "...";
+
+
+    if(
+        Math.random()<0.75
+    ){
+
+        setTimeout(
+            newEnemy,
+            800
+        );
+
+    }
+
+    else{
+
+        battleMessage.textContent =
+            "¡NO PUEDES ESCAPAR!";
+
+
+        battleMessage2.textContent =
+            "";
+
+
+        setTimeout(
+            enemyAttack,
+            500
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PROCESAR CHAT
+========================================================= */
+
+function processCommand(
+    user,
+    message
+){
+
+    const command =
+        message
+        .trim()
+        .toLowerCase();
+
+
+    /*
+       MOSTRAR EL MENSAJE
+       REAL DEL CHAT
+    */
+
+    addChat(
+        user,
+        message
+    );
+
+
+    /*
+       SI NO ES COMANDO,
+       NO HACE NADA MÁS
+    */
+
+    if(
+        !command.startsWith("!")
+    ){
+
+        return;
+
+    }
+
+
+    /*
+       COOLDOWN
+    */
+
+    const now =
+        Date.now();
+
+
+    if(
+        now-lastCommand<
+        COMMAND_COOLDOWN
+    ){
+
+        return;
+
+    }
+
+
+    lastCommand =
+        now;
+
+
+    /*
+       REGISTRAR JUGADOR
+    */
+
+    users.add(
+        user
+    );
+
+
+    playersCount.textContent =
+        users.size;
+
+
+    /*
+       ILUMINAR BOTÓN
+    */
+
+    highlightCommand(
+        command
+    );
+
+
+    /*
+       FIGHT
+    */
+
+    if(
+        command==="!fight" ||
+        command==="!f"
+    ){
+
+        fight(
+            user
+        );
+
+        return;
+
+    }
+
+
+    /*
+       BAG
+    */
+
+    if(
+        command==="!bag" ||
+        command==="!item" ||
+        command==="!potion"
+    ){
+
+        useBag(
+            user
+        );
+
+        return;
+
+    }
+
+
+    /*
+       POKÉMON
+    */
+
+    if(
+        command==="!pokemon" ||
+        command==="!poke"
+    ){
+
+        changePokemon(
+            user
+        );
+
+        return;
+
+    }
+
+
+    /*
+       CATCH
+    */
+
+    if(
+        command==="!catch" ||
+        command==="!pokeball"
+    ){
+
+        catchPokemon(
+            user
+        );
+
+        return;
+
+    }
+
+
+    /*
+       RUN
+    */
+
+    if(
+        command==="!run" ||
+        command==="!escape"
+    ){
+
+        run(
+            user
+        );
+
+        return;
+
+    }
+
+}
+
+
+/* =========================================================
+   TWITCH
+========================================================= */
+
+function connectTwitch(){
+
+    if(
+        typeof tmi==="undefined"
+    ){
+
+        connectionStatus.textContent =
+            "● ERROR TMI.JS";
+
+
+        connectionStatus.className =
+            "error";
+
+
+        return;
+
+    }
+
+
+    const client =
+        new tmi.Client({
+
+            options:{
+                debug:false
+            },
+
+            connection:{
+                secure:true,
+                reconnect:true
+            },
+
+            channels:[
+                CHANNEL
+            ]
+
+        });
+
+
+    client.on(
+        "connecting",
+        ()=>{
+
+            connectionStatus.textContent =
+                "● CONECTANDO TWITCH...";
+
+
+            connectionStatus.className =
+                "";
+
+        }
+    );
+
+
+    client.on(
+        "connected",
+        ()=>{
+
+            connectionStatus.textContent =
+                "● TWITCH CONECTADO";
+
+
+            connectionStatus.className =
+                "ok";
+
+
+            battleMessage.textContent =
+                "¡CHAT CONECTADO!";
+
+
+            battleMessage2.textContent =
+                "USA !FIGHT";
+
+        }
+    );
+
+
+    client.on(
+        "disconnected",
+        ()=>{
+
+            connectionStatus.textContent =
+                "● TWITCH DESCONECTADO";
+
+
+            connectionStatus.className =
+                "error";
+
+        }
+    );
+
+
+    client.on(
+        "message",
+        (
+            channel,
+            tags,
+            message,
+            self
+        )=>{
+
+            if(self){
+
+                return;
+
+            }
+
+
+            const username =
+                tags["display-name"]
+                ||
+                tags.username
+                ||
+                "usuario";
+
+
+            processCommand(
+                username,
+                message
+            );
+
+        }
+    );
+
+
+    client
+        .connect()
+        .catch(
+            error=>{
+
+                console.error(
+                    error
+                );
+
+
+                connectionStatus.textContent =
+                    "● ERROR TWITCH";
+
+
+                connectionStatus.className =
+                    "error";
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+async function start(){
+
+    await initTeam();
+
+    await newEnemy();
+
+    connectTwitch();
+
+}
+
+
+start();
+
+</script>
+
+</body>
+
+</html>
