@@ -1,548 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width,initial-scale=1.0">
-
-<script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
+<meta name="viewport" content="width=800, initial-scale=1.0">
+<title>Pokemon Twitch Battle</title>
 
 <style>
-
-/* =========================================================
-   BASE
-========================================================= */
-
 *{
     box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
 html,
 body{
-
-    margin:0;
-    padding:0;
-
     width:100%;
     height:100%;
-
     overflow:hidden;
-
     background:transparent;
-
-    font-family:
-        'Courier New',
-        monospace;
-
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-.battle{
-
+body{
     position:relative;
+}
 
+/* =========================================================
+   BATTLE FIELD
+========================================================= */
+
+#battle-field{
+    position:absolute;
+    left:0;
+    top:0;
     width:800px;
     height:500px;
-
     overflow:hidden;
 
-    background:#69cce3;
-
-    color:#17232b;
-
-}
-
-
-/* =========================================================
-   FONDO
-========================================================= */
-
-.background{
-
-    position:absolute;
-
-    left:0;
-    top:0;
-
-    width:100%;
-    height:365px;
-
-    overflow:hidden;
-
-    background:
-        linear-gradient(
-            #51c8e1 0%,
-            #91dfe0 42%,
-            #b7e59b 72%,
-            #6cc66a 100%
-        );
-
+    background-image:url("05_grass_plain.png");
+    background-size:cover;
+    background-position:center;
     transition:
-        background 1.5s ease;
-
+        background-image .7s ease,
+        filter .7s ease;
 }
 
-.background.sunny{
-
-    background:
-        linear-gradient(
-            #45c7e5 0%,
-            #91dfe0 45%,
-            #b9e59b 72%,
-            #6cc66a 100%
-        );
-
+/* Oscurecimiento nocturno */
+#battle-field.night::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(15,20,55,.30);
+    pointer-events:none;
+    z-index:1;
 }
-
-.background.cloudy{
-
-    background:
-        linear-gradient(
-            #7eabb5 0%,
-            #a8c2c4 45%,
-            #9bb98b 72%,
-            #679b63 100%
-        );
-
-}
-
-.background.rainy{
-
-    background:
-        linear-gradient(
-            #526d79 0%,
-            #718991 45%,
-            #76906f 72%,
-            #506d50 100%
-        );
-
-}
-
-.background.night{
-
-    background:
-        linear-gradient(
-            #101b3c 0%,
-            #1d3156 42%,
-            #294a45 72%,
-            #203b2b 100%
-        );
-
-}
-
 
 /* =========================================================
-   NUBES
+   WEATHER
 ========================================================= */
 
-.cloud{
-
+#weather-overlay{
     position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+}
 
-    background:
-        rgba(255,255,255,.7);
-
+.star{
+    position:absolute;
+    width:3px;
+    height:3px;
     border-radius:50%;
-
-    filter:blur(1px);
-
-    transition:
-        opacity 1s ease;
-
+    background:white;
+    opacity:.8;
+    animation:twinkle 2s infinite alternate;
 }
 
-.c1{
-
-    width:130px;
-    height:38px;
-
-    top:42px;
-    left:100px;
-
+@keyframes twinkle{
+    from{opacity:.2}
+    to{opacity:.9}
 }
-
-.c2{
-
-    width:170px;
-    height:45px;
-
-    top:75px;
-    left:335px;
-
-}
-
-.cloudy .cloud{
-    opacity:.9;
-}
-
-.night .cloud{
-    opacity:.12;
-}
-
-
-/* =========================================================
-   LUNA
-========================================================= */
 
 .moon{
-
     position:absolute;
-
-    width:48px;
-    height:48px;
-
-    right:300px;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:#f4f0c8;
+    right:75px;
     top:35px;
+    box-shadow:0 0 25px rgba(255,255,220,.45);
+}
 
+.moon::after{
+    content:"";
+    position:absolute;
+    width:52px;
+    height:52px;
     border-radius:50%;
-
-    background:#fff3bd;
-
-    box-shadow:
-        0 0 18px rgba(255,245,190,.7);
-
-    opacity:0;
-
-    transition:
-        opacity 1s ease;
-
+    background:#171b45;
+    left:-12px;
+    top:-5px;
 }
 
-.night .moon{
-    opacity:1;
-}
-
-
-/* =========================================================
-   ESTRELLAS
-========================================================= */
-
-.stars{
-
+.sun{
     position:absolute;
-
-    left:0;
-    top:0;
-
-    width:100%;
-    height:150px;
-
-    opacity:0;
-
-    transition:
-        opacity 1s ease;
-
-    background-image:
-        radial-gradient(
-            circle,
-            rgba(255,255,255,.9) 1px,
-            transparent 2px
-        );
-
-    background-size:
-        43px 37px;
-
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    background:#ffe36b;
+    right:75px;
+    top:35px;
+    box-shadow:0 0 35px rgba(255,220,70,.5);
 }
 
-.night .stars{
-    opacity:.8;
-}
-
-
-/* =========================================================
-   LLUVIA
-========================================================= */
-
-.rain{
-
+.cloud{
     position:absolute;
-
-    left:0;
-    top:0;
-
-    width:100%;
-    height:365px;
-
-    pointer-events:none;
-
-    opacity:0;
-
-    transition:
-        opacity 1s ease;
-
-    background:
-        repeating-linear-gradient(
-            110deg,
-            transparent 0 18px,
-            rgba(220,245,255,.28) 19px,
-            transparent 21px 34px
-        );
-
-    animation:
-        rainMove .7s linear infinite;
-
+    width:120px;
+    height:35px;
+    border-radius:30px;
+    background:rgba(255,255,255,.45);
+    top:55px;
+    left:90px;
 }
 
-.rainy .rain{
-    opacity:.65;
+.cloud::before,
+.cloud::after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    background:inherit;
 }
 
-@keyframes rainMove{
+.cloud::before{
+    width:50px;
+    height:50px;
+    left:18px;
+    top:-23px;
+}
 
+.cloud::after{
+    width:60px;
+    height:60px;
+    left:55px;
+    top:-30px;
+}
+
+.rain-drop{
+    position:absolute;
+    width:2px;
+    height:22px;
+    background:rgba(180,215,255,.75);
+    transform:rotate(18deg);
+    animation:rainfall .65s linear infinite;
+}
+
+@keyframes rainfall{
     from{
-        background-position:0 0;
+        transform:translateY(-40px) rotate(18deg);
     }
-
     to{
-        background-position:-40px 60px;
+        transform:translateY(560px) rotate(18deg);
     }
-
 }
-
 
 /* =========================================================
-   MONTAÑAS
+   TOP INFO
 ========================================================= */
 
-.mountain{
-
+#zone-info{
     position:absolute;
+    left:18px;
+    top:15px;
+    z-index:20;
 
-    bottom:108px;
+    padding:8px 13px;
 
-    width:0;
-    height:0;
+    border-radius:8px;
 
-    border-left:130px solid transparent;
-    border-right:130px solid transparent;
-    border-bottom:145px solid #7bb4b0;
+    background:rgba(0,0,0,.68);
+    border:2px solid rgba(255,255,255,.5);
 
-    opacity:.8;
+    color:white;
+    font-size:12px;
+    font-weight:900;
 
+    text-shadow:1px 1px 0 #000;
+
+    backdrop-filter:blur(4px);
 }
 
-.m1{
-    left:100px;
+#zone-name{
+    display:block;
+    font-size:14px;
 }
 
-.m2{
-
-    left:320px;
-
-    border-bottom-color:#69aaa8;
-
+#time-name{
+    display:block;
+    margin-top:2px;
+    opacity:.85;
 }
-
-.night .mountain{
-    border-bottom-color:#314e59;
-}
-
-.night .m2{
-    border-bottom-color:#29434b;
-}
-
 
 /* =========================================================
-   ÁRBOLES
+   ENEMY
 ========================================================= */
-
-.trees{
-
-    position:absolute;
-
-    bottom:105px;
-
-    width:150px;
-    height:155px;
-
-    background:
-
-        radial-gradient(
-            circle at 50% 25%,
-            #4f9b4c 0 40%,
-            transparent 41%
-        ),
-
-        radial-gradient(
-            circle at 25% 45%,
-            #3d8744 0 37%,
-            transparent 38%
-        ),
-
-        radial-gradient(
-            circle at 75% 48%,
-            #438e43 0 40%,
-            transparent 41%
-        );
-
-}
-
-.trees.left{
-    left:-25px;
-}
-
-.trees.right{
-    right:245px;
-}
-
-.night .trees{
-
-    filter:
-        brightness(.45)
-        saturate(.7);
-
-}
-
-
-/* =========================================================
-   SUELO
-========================================================= */
-
-.ground{
-
-    position:absolute;
-
-    bottom:0;
-    left:0;
-
-    width:585px;
-    height:175px;
-
-    background:
-
-        repeating-linear-gradient(
-            168deg,
-            #78ca65 0 9px,
-            #63b95b 9px 14px,
-            #91d36d 14px 20px
-        );
-
-}
-
-.night .ground{
-
-    filter:
-        brightness(.45)
-        saturate(.75);
-
-}
-
-
-/* =========================================================
-   CAMINO
-========================================================= */
-
-.path{
-
-    position:absolute;
-
-    left:135px;
-    bottom:0;
-
-    width:300px;
-    height:130px;
-
-    background:#d5bd7c;
-
-    transform:
-        perspective(300px)
-        rotateX(35deg);
-
-    opacity:.7;
-
-}
-
-.night .path{
-    filter:brightness(.5);
-}
-
-
-/* =========================================================
-   PASTO
-========================================================= */
-
-.grass-patch{
-
-    position:absolute;
-
-    background:#5eaf54;
-
-    border:
-        3px solid #3d753b;
-
-    border-radius:50%;
-
-    box-shadow:
-        inset 0 -8px 0 #4b9545;
-
-}
-
-.enemy-grass{
-
-    width:320px;
-    height:78px;
-
-    left:255px;
-    bottom:82px;
-
-}
-
-.player-grass{
-
-    width:350px;
-    height:84px;
-
-    left:5px;
-    bottom:18px;
-
-}
-
-.night .grass-patch{
-    filter:brightness(.48);
-}
-
-
-/* =========================================================
-   POKÉMON
-========================================================= */
-
-.pokemon{
-
-    position:absolute;
-
-    z-index:5;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    pointer-events:none;
-
-}
-
-.pokemon img{
-
-    image-rendering:pixelated;
-
-    object-fit:contain;
-
-    filter:
-        drop-shadow(
-            5px 7px 0 rgba(0,0,0,.22)
-        );
-
-    animation:
-        float 2.4s ease-in-out infinite;
-
-}
-
-
-/* ENEMIGO */
 
 .enemy-pokemon{
+    position:absolute;
 
     width:250px;
     height:250px;
@@ -550,22 +214,95 @@ body{
     left:275px;
     top:65px;
 
+    z-index:10;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .enemy-pokemon img{
-
     width:235px;
     height:235px;
 
     max-width:235px;
     max-height:235px;
 
+    object-fit:contain;
+
+    image-rendering:auto;
+
+    filter:drop-shadow(0 9px 5px rgba(0,0,0,.30));
 }
 
+.enemy-name{
+    position:absolute;
+    right:15px;
+    top:10px;
 
-/* JUGADOR */
+    min-width:145px;
+
+    padding:7px 10px;
+
+    background:rgba(255,255,255,.90);
+    border:2px solid #222;
+    border-radius:8px;
+
+    font-size:12px;
+    font-weight:900;
+
+    text-transform:uppercase;
+
+    box-shadow:3px 3px 0 rgba(0,0,0,.25);
+}
+
+.enemy-hp-container{
+    position:absolute;
+    right:15px;
+    top:46px;
+
+    width:145px;
+}
+
+.hp-label{
+    color:#222;
+    font-size:9px;
+    font-weight:900;
+    margin-bottom:3px;
+}
+
+.hp-bar{
+    width:100%;
+    height:12px;
+
+    background:#222;
+
+    border-radius:8px;
+
+    padding:2px;
+
+    box-shadow:0 2px 3px rgba(0,0,0,.35);
+}
+
+.hp-fill{
+    height:100%;
+    width:100%;
+
+    border-radius:6px;
+
+    background:#39c54a;
+
+    transition:
+        width .35s ease,
+        background .25s ease;
+}
+
+/* =========================================================
+   PLAYER
+========================================================= */
 
 .player-pokemon{
+    position:absolute;
 
     width:250px;
     height:250px;
@@ -573,163 +310,75 @@ body{
     left:25px;
     bottom:118px;
 
+    z-index:10;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .player-pokemon img{
-
     width:235px;
     height:235px;
 
     max-width:235px;
     max-height:235px;
 
+    object-fit:contain;
+
+    image-rendering:auto;
+
+    filter:drop-shadow(0 9px 5px rgba(0,0,0,.35));
 }
 
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-.status{
-
+.player-info{
     position:absolute;
 
-    z-index:10;
+    left:15px;
+    bottom:32px;
 
-    background:
+    width:190px;
 
-        linear-gradient(
-            180deg,
-            #ffffff 0%,
-            #f1f1f1 55%,
-            #d2d2d2 100%
-        );
+    padding:9px 11px;
 
-    border:
-        4px solid #26343b;
+    background:rgba(255,255,255,.92);
 
-    border-radius:5px;
+    border:2px solid #222;
+    border-radius:8px;
 
-    box-shadow:
-
-        inset 0 0 0 3px #ffffff,
-        6px 6px 0 rgba(0,0,0,.25);
-
-    padding:9px 13px;
-
+    box-shadow:3px 3px 0 rgba(0,0,0,.25);
 }
 
+.player-name{
+    font-size:12px;
+    font-weight:900;
 
-/* ENEMIGO */
-
-.enemy-status{
-
-    left:22px;
-    top:25px;
-
-    width:310px;
-    height:105px;
-
+    text-transform:uppercase;
 }
 
-
-/* JUGADOR */
-
-.player-status{
-
-    left:285px;
-    bottom:175px;
-
-    width:270px;
-    height:108px;
-
+.player-level{
+    float:right;
+    font-size:10px;
 }
 
-
-.status-name{
-
-    display:flex;
-
-    justify-content:space-between;
-    align-items:center;
-
-    font-size:20px;
-
-    font-weight:bold;
-
+.player-hp-container{
+    margin-top:5px;
 }
 
-
-.hp-row{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:7px;
-
-    margin-top:8px;
-
-    font-size:13px;
-
-    font-weight:bold;
-
-}
-
-.hp-row span{
-    color:#e0a400;
-}
-
-.hp-bar{
-
-    height:14px;
-
-    flex:1;
-
-    background:#343434;
-
-    border:
-        2px solid #202020;
-
-    border-radius:5px;
-
-    overflow:hidden;
-
-}
-
-.hp-fill{
-
-    height:100%;
-
-    width:100%;
-
-    background:#39b94a;
-
-    transition:
-        width .35s ease,
-        background .35s ease;
-
-}
-
-.hp-number{
+.player-hp-numbers{
+    margin-top:3px;
 
     text-align:right;
 
-    font-size:13px;
-
-    font-weight:bold;
-
-    margin-top:3px;
-
+    font-size:9px;
+    font-weight:900;
 }
 
-
 /* =========================================================
-   PANEL LATERAL
+   SIDE PANEL
 ========================================================= */
 
 .side-panel{
-
     position:absolute;
 
     right:7px;
@@ -738,104 +387,136 @@ body{
     width:212px;
     height:340px;
 
-    background:
-        rgba(22,43,52,.96);
+    z-index:30;
 
-    border:
-        4px solid #29434d;
+    padding:10px;
+
+    border-radius:12px;
+
+    background:rgba(17,17,22,.87);
+
+    border:2px solid rgba(255,255,255,.5);
+
+    color:white;
 
     box-shadow:
+        0 6px 20px rgba(0,0,0,.35);
 
-        inset 0 0 0 2px #6d9198,
-        5px 5px 0 rgba(0,0,0,.25);
+    backdrop-filter:blur(5px);
+}
 
-    z-index:20;
+.panel-title{
+    font-size:14px;
+    font-weight:900;
+
+    margin-bottom:8px;
 
     color:#fff;
-
-    padding:11px;
-
 }
 
-.side-heading{
-
-    font-size:12px;
-
-    color:#77d6eb;
-
-    font-weight:bold;
-
-    letter-spacing:.5px;
-
-}
-
-.zone{
-
-    font-size:20px;
-
-    font-weight:bold;
-
-    margin-top:3px;
-
-}
-
-.separator{
-
-    height:2px;
-
-    background:#567078;
-
-    margin:8px 0;
-
-}
-
-.weather{
-
-    font-size:14px;
-
-    color:#ffdd6b;
+.status{
+    font-size:10px;
+    margin-bottom:7px;
 
     white-space:nowrap;
-
-}
-
-.players{
-
-    font-size:23px;
-
-    font-weight:bold;
-
-}
-
-.fake-chat{
-
-    font-size:11px;
-
-    line-height:18px;
-
-    margin-top:5px;
-
-    white-space:nowrap;
-
     overflow:hidden;
-
-}
-
-.fake-chat div{
-
-    overflow:hidden;
-
     text-overflow:ellipsis;
-
 }
 
+.status.connected{
+    color:#55e878;
+}
+
+.status.connecting{
+    color:#ffd65a;
+}
+
+.status.error{
+    color:#ff6464;
+}
+
+.team-title{
+    margin-top:9px;
+    margin-bottom:5px;
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.team-list{
+    display:flex;
+    gap:4px;
+}
+
+.team-slot{
+    width:56px;
+    height:42px;
+
+    border:1px solid rgba(255,255,255,.3);
+    border-radius:6px;
+
+    background:rgba(255,255,255,.08);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.team-slot.active{
+    border:2px solid #ffe45b;
+    background:rgba(255,220,80,.15);
+}
+
+.team-slot.fainted{
+    opacity:.25;
+    filter:grayscale(1);
+}
+
+.team-slot img{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+}
+
+.team-slot-number{
+    position:absolute;
+
+    bottom:1px;
+    right:3px;
+
+    font-size:8px;
+    font-weight:900;
+}
+
+.stats{
+    margin-top:10px;
+
+    padding-top:8px;
+
+    border-top:1px solid rgba(255,255,255,.18);
+
+    font-size:10px;
+    line-height:1.7;
+}
+
+.stats-row{
+    display:flex;
+    justify-content:space-between;
+}
+
+#weather-status{
+    color:#ffe36b;
+}
 
 /* =========================================================
-   MENÚ
+   BATTLE MENU
 ========================================================= */
 
 .battle-menu{
-
     position:absolute;
 
     left:0;
@@ -844,604 +525,343 @@ body{
     width:100%;
     height:150px;
 
-    background:#27333b;
-
-    border-top:
-        5px solid #111b21;
-
-    z-index:30;
-
-    padding:11px;
+    z-index:40;
 
     display:flex;
 
-    gap:14px;
+    background:rgba(18,18,24,.94);
 
+    border-top:3px solid rgba(255,255,255,.65);
 }
 
+.message-box{
+    width:52%;
 
-.question{
+    padding:13px 15px;
 
-    position:relative;
-
-    width:390px;
-    height:125px;
-
-    background:#f7f7f7;
-
-    border:
-        5px solid #29333b;
-
-    box-shadow:
-
-        inset 0 0 0 3px #c6b173,
-        5px 5px 0 #111b21;
-
-    border-radius:5px;
-
-    padding:18px 22px;
-
-    font-size:25px;
-
-    line-height:34px;
-
-    font-weight:bold;
-
-}
-
-.cursor{
-
-    position:absolute;
-
-    right:16px;
-    bottom:8px;
-
-    font-size:20px;
-
-}
-
-
-/* =========================================================
-   BOTONES
-========================================================= */
-
-.buttons{
-
-    width:275px;
-    height:125px;
-
-    display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    grid-template-rows:
-        1fr 1fr;
-
-    gap:8px;
-
-}
-
-.battle-button{
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    border:
-        4px solid #26313a;
-
-    box-shadow:
-
-        inset 0 0 0 2px rgba(255,255,255,.65),
-        3px 3px 0 #111b21;
-
-    border-radius:12px;
+    border-right:2px solid rgba(255,255,255,.16);
 
     color:white;
 
-    font-size:20px;
-
-    font-weight:bold;
-
-    text-shadow:
-        2px 2px #333;
-
-    transition:
-        filter .12s ease,
-        transform .12s ease;
-
+    display:flex;
+    flex-direction:column;
 }
 
-.fight{
-    background:#df6868;
+#battle-message{
+    font-size:13px;
+    line-height:1.35;
+    font-weight:800;
+
+    min-height:42px;
 }
 
-.bag{
-    background:#d8ae53;
+.chat-title{
+    margin-top:9px;
+
+    font-size:9px;
+    font-weight:900;
+
+    color:#aaa;
 }
 
-.pokemon-button{
-    background:#5da85a;
-}
+.chat-feed{
+    margin-top:4px;
 
-.run{
-    background:#5a8fc5;
-}
+    height:62px;
 
-.battle-button.active{
-
-    outline:
-        4px solid white;
-
-    filter:
-        brightness(1.25);
-
-    transform:
-        scale(1.025;
-
-}
-
-
-/* =========================================================
-   CONEXIÓN
-========================================================= */
-
-#connectionStatus{
-
-    position:absolute;
-
-    right:225px;
-    top:365px;
-
-    z-index:50;
-
-    color:#fff;
+    overflow:hidden;
 
     font-size:9px;
 
-    background:
-        rgba(0,0,0,.7);
-
-    padding:
-        5px 8px;
-
-    border-radius:3px;
-
+    color:#ddd;
 }
 
-#connectionStatus.ok{
-    color:#65ff73;
+.chat-line{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    margin-bottom:2px;
 }
 
-#connectionStatus.error{
-    color:#ff6262;
+.chat-user{
+    color:#ffe36b;
+    font-weight:900;
 }
-
 
 /* =========================================================
-   DAÑO
+   BUTTONS
 ========================================================= */
 
-.damage{
+.action-grid{
+    width:48%;
 
-    position:absolute;
+    padding:13px;
 
-    z-index:60;
+    display:grid;
 
-    font-size:28px;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
 
-    font-weight:bold;
-
-    color:#fff;
-
-    text-shadow:
-        3px 3px 0 #000;
-
-    animation:
-        damage .8s forwards;
-
-    pointer-events:none;
-
+    gap:8px;
 }
 
-.enemy-damage{
+.action-button{
+    border:none;
 
-    left:360px;
-    top:135px;
+    border-radius:7px;
 
+    background:#292934;
+
+    color:white;
+
+    font-size:11px;
+    font-weight:900;
+
+    cursor:pointer;
+
+    border:2px solid rgba(255,255,255,.18);
+
+    transition:
+        transform .12s ease,
+        background .12s ease,
+        border-color .12s ease;
 }
 
-.player-damage{
-
-    left:150px;
-    bottom:225px;
-
+.action-button:hover{
+    background:#3c3c4b;
 }
 
+.action-button.active{
+    background:#f0c933;
+    color:#171717;
 
-@keyframes damage{
+    border-color:#fff;
 
-    0%{
-
-        opacity:0;
-
-        transform:
-            translateY(15px)
-            scale(.7);
-
-    }
-
-    20%{
-
-        opacity:1;
-
-        transform:
-            translateY(0)
-            scale(1.2);
-
-    }
-
-    100%{
-
-        opacity:0;
-
-        transform:
-            translateY(-35px)
-            scale(1);
-
-    }
-
+    transform:scale(.97);
 }
 
-
-@keyframes float{
-
-    0%,100%{
-        transform:translateY(0);
-    }
-
-    50%{
-        transform:translateY(-7px);
-    }
-
+.action-button.disabled{
+    opacity:.35;
+    cursor:not-allowed;
 }
 
+/* =========================================================
+   TRANSITIONS
+========================================================= */
 
-@keyframes appear{
-
-    0%{
-
-        opacity:0;
-
-        transform:
-            scale(.1);
-
-    }
-
-    70%{
-
-        opacity:1;
-
-        transform:
-            scale(1.08);
-
-    }
-
-    100%{
-
-        opacity:1;
-
-        transform:
-            scale(1);
-
-    }
-
+.hit{
+    animation:hit .28s ease;
 }
 
-.appear{
-    animation:
-        appear .65s ease-out;
+@keyframes hit{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-10px)}
+    50%{transform:translateX(10px)}
+    75%{transform:translateX(-7px)}
+    100%{transform:translateX(0)}
 }
 
+.fainted{
+    animation:faint .5s ease forwards;
+}
+
+@keyframes faint{
+    to{
+        opacity:.15;
+        transform:translateY(15px);
+    }
+}
+
+/* =========================================================
+   RESPONSIVE SCALE
+========================================================= */
+
+#battle-field{
+    transform-origin:top left;
+}
 </style>
-
 </head>
-
 
 <body>
 
+<div id="battle-field">
 
-<div class="battle">
+    <div id="weather-overlay"></div>
 
-
-<!-- =====================================================
-     FONDO
-====================================================== -->
-
-<div
-    id="background"
-    class="background">
-
-    <div class="stars"></div>
-
-    <div class="moon"></div>
-
-    <div class="cloud c1"></div>
-
-    <div class="cloud c2"></div>
-
-    <div class="rain"></div>
-
-    <div class="mountain m1"></div>
-
-    <div class="mountain m2"></div>
-
-    <div class="trees left"></div>
-
-    <div class="trees right"></div>
-
-    <div class="ground"></div>
-
-    <div class="path"></div>
-
-    <div class="grass-patch enemy-grass"></div>
-
-    <div class="grass-patch player-grass"></div>
-
-</div>
-
-
-<!-- =====================================================
-     STATUS ENEMIGO
-====================================================== -->
-
-<div class="enemy-status status">
-
-    <div class="status-name">
-
-        <span id="enemyName">
-            CARGANDO...
-        </span>
-
-        <span>
-            Lv.
-            <b id="enemyLevel">
-                18
-            </b>
-        </span>
-
+    <!-- ZONA / HORA -->
+    <div id="zone-info">
+        <span id="zone-name">🌿 PRADERA</span>
+        <span id="time-name">☀️ DÍA</span>
     </div>
 
-    <div class="hp-row">
+    <!-- ENEMIGO -->
+    <div class="enemy-pokemon" id="enemy-container">
+        <img id="enemy-sprite" src="" alt="Enemy">
 
-        <span>
-            HP
-        </span>
+        <div class="enemy-name" id="enemy-name">
+            POKÉMON SALVAJE
+        </div>
 
-        <div class="hp-bar">
+        <div class="enemy-hp-container">
+            <div class="hp-label">HP</div>
 
-            <div
-                id="enemyHp"
-                class="hp-fill">
+            <div class="hp-bar">
+                <div class="hp-fill" id="enemy-hp-fill"></div>
             </div>
-
         </div>
-
     </div>
 
-    <div
-        class="hp-number"
-        id="enemyHpNumber">
-
-        100/100
-
+    <!-- JUGADOR -->
+    <div class="player-pokemon" id="player-container">
+        <img id="player-sprite" src="" alt="Player">
     </div>
 
-</div>
+    <div class="player-info">
 
-
-<!-- =====================================================
-     ENEMIGO
-====================================================== -->
-
-<div class="enemy-pokemon pokemon">
-
-    <img
-        id="enemyImg"
-        src=""
-        alt="Enemy">
-
-</div>
-
-
-<!-- =====================================================
-     STATUS JUGADOR
-====================================================== -->
-
-<div class="player-status status">
-
-    <div class="status-name">
-
-        <span id="playerName">
-            PIKACHU
-        </span>
-
-        <span>
-            Lv.
-            <b id="playerLevel">
-                20
-            </b>
-        </span>
-
-    </div>
-
-    <div class="hp-row">
-
-        <span>
-            HP
-        </span>
-
-        <div class="hp-bar">
-
-            <div
-                id="playerHp"
-                class="hp-fill">
-            </div>
-
-        </div>
-
-    </div>
-
-    <div
-        class="hp-number"
-        id="playerHpNumber">
-
-        100/100
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     JUGADOR
-====================================================== -->
-
-<div class="player-pokemon pokemon">
-
-    <img
-        id="playerImg"
-        src=""
-        alt="Player">
-
-</div>
-
-
-<!-- =====================================================
-     PANEL
-====================================================== -->
-
-<div class="side-panel">
-
-    <div class="side-heading">
-        POKÉMON TWITCH PLAYS
-    </div>
-
-    <div
-        class="zone"
-        id="zoneText">
-
-        ZONA SALVAJE
-
-    </div>
-
-    <div class="separator"></div>
-
-    <div
-        class="weather"
-        id="weatherText">
-
-        ☀️ SOLEADO
-
-    </div>
-
-    <div class="separator"></div>
-
-    <div class="side-heading">
-        JUGADORES
-    </div>
-
-    <div
-        class="players"
-        id="playersCount">
-
-        0
-
-    </div>
-
-    <div class="separator"></div>
-
-    <div class="side-heading">
-        CHAT
-    </div>
-
-    <div
-        class="fake-chat"
-        id="chatFeed">
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     CONEXIÓN
-====================================================== -->
-
-<div id="connectionStatus">
-
-    ● CONECTANDO TWITCH...
-
-</div>
-
-
-<!-- =====================================================
-     MENÚ
-====================================================== -->
-
-<div class="battle-menu">
-
-
-    <div class="question">
-
-        <div id="battleMessage">
-            ¡UN POKÉMON SALVAJE APARECIÓ!
-        </div>
-
-        <div id="battleMessage2">
-            ESCRIBE !FIGHT
-        </div>
-
-        <div class="cursor">
-            ▼
-        </div>
-
-    </div>
-
-
-    <div class="buttons">
-
-        <div
-            id="fightButton"
-            class="battle-button fight">
-
-            FIGHT
-
-        </div>
-
-        <div
-            id="bagButton"
-            class="battle-button bag">
-
-            BAG
-
-        </div>
-
-        <div
-            id="pokemonButton"
-            class="battle-button pokemon-button">
-
+        <span class="player-name" id="player-name">
             POKÉMON
+        </span>
 
+        <span class="player-level">
+            LV <span id="player-level">50</span>
+        </span>
+
+        <div class="player-hp-container">
+
+            <div class="hp-bar">
+                <div class="hp-fill" id="player-hp-fill"></div>
+            </div>
+
+            <div class="player-hp-numbers">
+                <span id="player-hp">100</span> /
+                <span id="player-max-hp">100</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PANEL -->
+    <div class="side-panel">
+
+        <div class="panel-title">
+            ⚔️ POKÉMON BATTLE
         </div>
 
         <div
-            id="runButton"
-            class="battle-button run">
+            id="connection-status"
+            class="status connecting">
+            ● CONECTANDO TWITCH...
+        </div>
 
-            RUN
+        <div class="status">
+            CANAL:
+            <strong id="channel-name">---</strong>
+        </div>
+
+        <div class="status">
+            ZONA:
+            <strong id="panel-zone">PRADERA</strong>
+        </div>
+
+        <div class="status">
+            CLIMA:
+            <strong id="weather-status">---</strong>
+        </div>
+
+        <div class="team-title">
+            TU EQUIPO
+        </div>
+
+        <div class="team-list">
+
+            <div class="team-slot active" id="team-slot-0">
+                <img id="team-img-0" src="">
+                <span class="team-slot-number">1</span>
+            </div>
+
+            <div class="team-slot" id="team-slot-1">
+                <img id="team-img-1" src="">
+                <span class="team-slot-number">2</span>
+            </div>
+
+            <div class="team-slot" id="team-slot-2">
+                <img id="team-img-2" src="">
+                <span class="team-slot-number">3</span>
+            </div>
+
+        </div>
+
+        <div class="stats">
+
+            <div class="stats-row">
+                <span>👥 JUGADORES</span>
+                <strong id="unique-users">0</strong>
+            </div>
+
+            <div class="stats-row">
+                <span>⚔️ BATALLAS</span>
+                <strong id="battle-count">0</strong>
+            </div>
+
+            <div class="stats-row">
+                <span>🎯 CAPTURADOS</span>
+                <strong id="capture-count">0</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MENU -->
+    <div class="battle-menu">
+
+        <div class="message-box">
+
+            <div id="battle-message">
+                ¡Un Pokémon salvaje apareció!
+            </div>
+
+            <div class="chat-title">
+                CHAT DE TWITCH
+            </div>
+
+            <div
+                class="chat-feed"
+                id="chat-feed">
+            </div>
+
+        </div>
+
+        <div class="action-grid">
+
+            <button
+                class="action-button"
+                id="btn-fight"
+                onclick="buttonCommand('!fight')">
+                ⚔️ FIGHT
+            </button>
+
+            <button
+                class="action-button"
+                id="btn-bag"
+                onclick="buttonCommand('!bag')">
+                🎒 BAG
+            </button>
+
+            <button
+                class="action-button"
+                id="btn-pokemon"
+                onclick="buttonCommand('!pokemon')">
+                🔄 POKÉMON
+            </button>
+
+            <button
+                class="action-button"
+                id="btn-run"
+                onclick="buttonCommand('!run')">
+                🏃 RUN
+            </button>
 
         </div>
 
@@ -1449,512 +869,1101 @@ body{
 
 </div>
 
-
-</div>
-
+<script src="https://github.com/tmijs/tmi.js/releases/download/v1.8.5/tmi.min.js"></script>
 
 <script>
 
-
 /* =========================================================
-   CONFIGURACIÓN TWITCH
+   CONFIGURACIÓN
 ========================================================= */
 
-const params =
-    new URLSearchParams(
-        window.location.search
-    );
-
-
-const URL_CHANNEL =
-    params.get("channel");
-
+const params = new URLSearchParams(window.location.search);
 
 const CHANNEL =
-    URL_CHANNEL &&
-    URL_CHANNEL.trim() !== ""
-        ? URL_CHANNEL.trim().toLowerCase()
-        : "rubius";
+    (params.get("channel") || "rubius")
+    .replace("#","")
+    .trim()
+    .toLowerCase();
+
+const POKE_API =
+    "https://pokeapi.co/api/v2/pokemon/";
+
+const SPRITE_FRONT =
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+
+const SPRITE_BACK =
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/";
+
+const WEATHER_LAT = 19.4326;
+const WEATHER_LON = -99.1332;
 
 
 /* =========================================================
    ELEMENTOS
 ========================================================= */
 
-const background =
-    document.getElementById(
-        "background"
-    );
+const battleField =
+    document.getElementById("battle-field");
+
+const enemySprite =
+    document.getElementById("enemy-sprite");
 
 const enemyName =
-    document.getElementById(
-        "enemyName"
-    );
+    document.getElementById("enemy-name");
 
-const enemyLevel =
-    document.getElementById(
-        "enemyLevel"
-    );
+const enemyHpFill =
+    document.getElementById("enemy-hp-fill");
 
-const enemyHp =
-    document.getElementById(
-        "enemyHp"
-    );
-
-const enemyHpNumber =
-    document.getElementById(
-        "enemyHpNumber"
-    );
-
-const enemyImg =
-    document.getElementById(
-        "enemyImg"
-    );
+const playerSprite =
+    document.getElementById("player-sprite");
 
 const playerName =
-    document.getElementById(
-        "playerName"
-    );
+    document.getElementById("player-name");
 
-const playerLevel =
-    document.getElementById(
-        "playerLevel"
-    );
+const playerHpFill =
+    document.getElementById("player-hp-fill");
 
-const playerHp =
-    document.getElementById(
-        "playerHp"
-    );
+const playerHpText =
+    document.getElementById("player-hp");
 
-const playerHpNumber =
-    document.getElementById(
-        "playerHpNumber"
-    );
+const playerMaxHpText =
+    document.getElementById("player-max-hp");
 
-const playerImg =
-    document.getElementById(
-        "playerImg"
-    );
+const playerLevelText =
+    document.getElementById("player-level");
 
 const battleMessage =
-    document.getElementById(
-        "battleMessage"
-    );
-
-const battleMessage2 =
-    document.getElementById(
-        "battleMessage2"
-    );
-
-const playersCount =
-    document.getElementById(
-        "playersCount"
-    );
-
-const chatFeed =
-    document.getElementById(
-        "chatFeed"
-    );
-
-const weatherText =
-    document.getElementById(
-        "weatherText"
-    );
+    document.getElementById("battle-message");
 
 const connectionStatus =
-    document.getElementById(
-        "connectionStatus"
-    );
+    document.getElementById("connection-status");
 
-const fightButton =
-    document.getElementById(
-        "fightButton"
-    );
+const channelName =
+    document.getElementById("channel-name");
 
-const bagButton =
-    document.getElementById(
-        "bagButton"
-    );
+const chatFeed =
+    document.getElementById("chat-feed");
 
-const pokemonButton =
-    document.getElementById(
-        "pokemonButton"
-    );
+const uniqueUsersText =
+    document.getElementById("unique-users");
 
-const runButton =
-    document.getElementById(
-        "runButton"
-    );
+const battleCountText =
+    document.getElementById("battle-count");
+
+const captureCountText =
+    document.getElementById("capture-count");
+
+const zoneNameText =
+    document.getElementById("zone-name");
+
+const panelZoneText =
+    document.getElementById("panel-zone");
+
+const timeNameText =
+    document.getElementById("time-name");
+
+const weatherStatus =
+    document.getElementById("weather-status");
+
+channelName.textContent = CHANNEL;
 
 
 /* =========================================================
-   VARIABLES
+   ESTADO DEL JUEGO
 ========================================================= */
 
-let enemy = {
+let enemy = null;
 
-    id:1,
-
-    name:"BULBASAUR",
-
-    hp:100,
-
-    maxHp:100
-
-};
-
-
-let player = {
-
-    id:25,
-
-    name:"PIKACHU",
-
-    hp:100,
-
-    maxHp:100
-
-};
-
+let enemyHp = 100;
+let enemyMaxHp = 100;
 
 let team = [];
+let activePokemon = 0;
 
-let teamIndex = 0;
+let playerHp = 100;
+let playerMaxHp = 100;
 
-let activeTimer = null;
+let battleCount = 0;
+let captureCount = 0;
 
-let lastCommand = 0;
+let battleBusy = false;
 
-const COMMAND_COOLDOWN = 800;
+let uniqueUsers = new Set();
 
-const users = new Set();
+let recentEnemyIds = [];
+
+let currentZone = null;
+let currentTime = null;
 
 
-const items = {
+/* =========================================================
+   FONDOS
+========================================================= */
 
-    potion:5,
+const BACKGROUNDS = {
 
-    pokeball:5
+    cavePurple:{
+        file:"01_cave_purple.png",
+        name:"CUEVA MISTERIOSA",
+        icon:"🟣"
+    },
+
+    rockyDay:{
+        file:"02_rocky_day.png",
+        name:"ZONA ROCOSA",
+        icon:"🪨"
+    },
+
+    snowWhite:{
+        file:"03_snow_white.png",
+        name:"MONTAÑA NEVADA",
+        icon:"❄️"
+    },
+
+    snowBlue:{
+        file:"04_snow_blue.png",
+        name:"ZONA HELADA",
+        icon:"🧊"
+    },
+
+    grassPlain:{
+        file:"05_grass_plain.png",
+        name:"PRADERA",
+        icon:"🌿"
+    },
+
+    tallGrass:{
+        file:"06_tall_grass.png",
+        name:"HIERBA ALTA",
+        icon:"🌾"
+    },
+
+    darkRock:{
+        file:"07_dark_rock.png",
+        name:"CUEVA OSCURA",
+        icon:"🌑"
+    },
+
+    water:{
+        file:"08_water.png",
+        name:"LAGO",
+        icon:"🌊"
+    },
+
+    sandBeach:{
+        file:"09_sand_beach.png",
+        name:"PLAYA",
+        icon:"🏖️"
+    },
+
+    forestGrass:{
+        file:"10_forest_grass.png",
+        name:"BOSQUE",
+        icon:"🌲"
+    },
+
+    sandyGround:{
+        file:"11_sandy_ground.png",
+        name:"DESIERTO",
+        icon:"🏜️"
+    }
 
 };
 
 
 /* =========================================================
-   POKÉAPI
+   MAPA DE TIPOS → ZONAS
 ========================================================= */
 
-const API =
-    "https://pokeapi.co/api/v2/pokemon/";
+const TYPE_ZONES = {
 
-const SPRITE =
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+    water:[
+        "water",
+        "sandBeach"
+    ],
+
+    ice:[
+        "snowWhite",
+        "snowBlue"
+    ],
+
+    grass:[
+        "grassPlain",
+        "tallGrass",
+        "forestGrass"
+    ],
+
+    bug:[
+        "tallGrass",
+        "forestGrass"
+    ],
+
+    rock:[
+        "rockyDay",
+        "darkRock"
+    ],
+
+    ground:[
+        "sandyGround",
+        "rockyDay"
+    ],
+
+    fire:[
+        "rockyDay",
+        "sandyGround"
+    ],
+
+    ghost:[
+        "cavePurple",
+        "darkRock"
+    ],
+
+    dark:[
+        "darkRock",
+        "forestGrass"
+    ],
+
+    poison:[
+        "cavePurple",
+        "forestGrass"
+    ],
+
+    electric:[
+        "grassPlain",
+        "rockyDay"
+    ],
+
+    flying:[
+        "grassPlain",
+        "rockyDay"
+    ],
+
+    normal:[
+        "grassPlain",
+        "tallGrass"
+    ],
+
+    fairy:[
+        "grassPlain",
+        "forestGrass"
+    ],
+
+    fighting:[
+        "rockyDay",
+        "grassPlain"
+    ],
+
+    psychic:[
+        "grassPlain",
+        "cavePurple"
+    ],
+
+    steel:[
+        "rockyDay",
+        "darkRock"
+    ],
+
+    dragon:[
+        "rockyDay",
+        "darkRock"
+    ]
+
+};
 
 
-function loadSprite(
-    img,
-    id,
-    back
-){
+/* =========================================================
+   UTILIDADES
+========================================================= */
 
-    const normal =
-        SPRITE +
-        id +
-        ".png";
+function random(min,max){
+    return Math.floor(
+        Math.random() * (max - min + 1)
+    ) + min;
+}
 
-    const backside =
-        SPRITE +
-        "back/" +
-        id +
-        ".png";
+function randomItem(array){
+    return array[
+        Math.floor(Math.random() * array.length)
+    ];
+}
 
-    img.src =
-        back
-            ? backside
-            : normal;
-
+function capitalize(text){
+    if(!text) return "";
+    return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 
 /* =========================================================
-   POKÉMON RANDOM
+   HORA DEL DÍA
 ========================================================= */
 
-async function getRandomPokemon(){
+function getTimeOfDay(){
 
-    const id =
-        Math.floor(
-            Math.random()*1025
-        )+1;
+    const hour =
+        new Date().getHours();
 
+    if(hour >= 6 && hour < 17){
+        return {
+            id:"day",
+            name:"☀️ DÍA"
+        };
+    }
+
+    if(hour >= 17 && hour < 19){
+        return {
+            id:"sunset",
+            name:"🌅 ATARDECER"
+        };
+    }
+
+    return {
+        id:"night",
+        name:"🌙 NOCHE"
+    };
+}
+
+
+/* =========================================================
+   WEATHER
+========================================================= */
+
+function fallbackWeather(){
+
+    const time =
+        getTimeOfDay();
+
+    if(time.id === "night"){
+        setWeather("night");
+        return;
+    }
+
+    setWeather("sunny");
+}
+
+
+function setWeather(type){
+
+    weatherStatus.className = "";
+
+    const overlay =
+        document.getElementById("weather-overlay");
+
+    overlay.innerHTML = "";
+
+    battleField.classList.remove("night");
+
+    if(type === "night"){
+
+        battleField.classList.add("night");
+
+        weatherStatus.textContent =
+            "🌙 NOCHE";
+
+        for(let i=0;i<35;i++){
+
+            const star =
+                document.createElement("div");
+
+            star.className = "star";
+
+            star.style.left =
+                random(0,790) + "px";
+
+            star.style.top =
+                random(0,260) + "px";
+
+            star.style.animationDelay =
+                (Math.random()*2) + "s";
+
+            overlay.appendChild(star);
+        }
+
+        const moon =
+            document.createElement("div");
+
+        moon.className = "moon";
+
+        overlay.appendChild(moon);
+
+        return;
+    }
+
+    if(type === "rainy"){
+
+        weatherStatus.textContent =
+            "🌧️ LLUVIA";
+
+        for(let i=0;i<70;i++){
+
+            const drop =
+                document.createElement("div");
+
+            drop.className = "rain-drop";
+
+            drop.style.left =
+                random(0,800) + "px";
+
+            drop.style.top =
+                random(-100,450) + "px";
+
+            drop.style.animationDelay =
+                (Math.random()*1.2) + "s";
+
+            overlay.appendChild(drop);
+        }
+
+        return;
+    }
+
+    if(type === "cloudy"){
+
+        weatherStatus.textContent =
+            "☁️ NUBLADO";
+
+        const cloud =
+            document.createElement("div");
+
+        cloud.className = "cloud";
+
+        overlay.appendChild(cloud);
+
+        return;
+    }
+
+    weatherStatus.textContent =
+        "☀️ SOLEADO";
+
+    const sun =
+        document.createElement("div");
+
+    sun.className = "sun";
+
+    overlay.appendChild(sun);
+}
+
+
+/* =========================================================
+   WEATHER API
+========================================================= */
+
+async function updateWeather(){
+
+    const time =
+        getTimeOfDay();
+
+    if(time.id === "night"){
+
+        setWeather("night");
+
+        timeNameText.textContent =
+            time.name;
+
+        return;
+    }
+
+    try{
+
+        const url =
+            "https://api.open-meteo.com/v1/forecast" +
+            "?latitude=" + WEATHER_LAT +
+            "&longitude=" + WEATHER_LON +
+            "&current=weather_code";
+
+        const response =
+            await fetch(url,{
+                cache:"no-store"
+            });
+
+        if(!response.ok){
+            throw new Error("Weather error");
+        }
+
+        const data =
+            await response.json();
+
+        const code =
+            data.current.weather_code;
+
+        if(code === 0 || code === 1){
+            setWeather("sunny");
+        }
+        else if(code === 2 || code === 3){
+            setWeather("cloudy");
+        }
+        else if(code >= 51 && code <= 99){
+            setWeather("rainy");
+        }
+        else{
+            setWeather("cloudy");
+        }
+
+        timeNameText.textContent =
+            time.name;
+
+    }
+    catch(error){
+
+        console.log(
+            "No se pudo obtener el clima:",
+            error
+        );
+
+        fallbackWeather();
+
+        timeNameText.textContent =
+            time.name;
+    }
+}
+
+
+/* =========================================================
+   SELECCIONAR ZONA
+========================================================= */
+
+function selectZone(types){
+
+    const time =
+        getTimeOfDay();
+
+    let possibleZones = [];
+
+    /*
+     * Primero intentamos usar los tipos del Pokémon.
+     */
+
+    types.forEach(type => {
+
+        if(TYPE_ZONES[type]){
+            possibleZones =
+                possibleZones.concat(
+                    TYPE_ZONES[type]
+                );
+        }
+
+    });
+
+
+    /*
+     * Si no encontramos zona,
+     * usamos zonas generales.
+     */
+
+    if(possibleZones.length === 0){
+
+        possibleZones = [
+            "grassPlain",
+            "tallGrass",
+            "rockyDay",
+            "forestGrass"
+        ];
+
+    }
+
+
+    /*
+     * Durante la noche aumentamos
+     * la posibilidad de zonas oscuras.
+     */
+
+    if(time.id === "night"){
+
+        possibleZones =
+            possibleZones.concat([
+                "cavePurple",
+                "darkRock",
+                "forestGrass"
+            ]);
+
+    }
+
+
+    /*
+     * Atardecer puede usar
+     * zonas abiertas.
+     */
+
+    if(time.id === "sunset"){
+
+        possibleZones =
+            possibleZones.concat([
+                "sandBeach",
+                "rockyDay",
+                "grassPlain"
+            ]);
+
+    }
+
+
+    const zoneId =
+        randomItem(possibleZones);
+
+    currentZone =
+        BACKGROUNDS[zoneId];
+
+    currentTime =
+        time;
+
+
+    applyBackground(
+        zoneId,
+        currentTime
+    );
+
+    return zoneId;
+}
+
+
+/* =========================================================
+   APLICAR BACKGROUND
+========================================================= */
+
+function applyBackground(zoneId,time){
+
+    const zone =
+        BACKGROUNDS[zoneId];
+
+    if(!zone){
+        return;
+    }
+
+    battleField.style.backgroundImage =
+        'url("' + zone.file + '")';
+
+    zoneNameText.textContent =
+        zone.icon + " " + zone.name;
+
+    panelZoneText.textContent =
+        zone.name;
+
+    timeNameText.textContent =
+        time.name;
+}
+
+
+/* =========================================================
+   POKEAPI
+========================================================= */
+
+async function getPokemon(id){
 
     try{
 
         const response =
             await fetch(
-                API + id
+                POKE_API + id
             );
 
-        const data =
-            await response.json();
+        if(!response.ok){
+            throw new Error(
+                "Pokémon no encontrado"
+            );
+        }
 
-
-        return {
-
-            id:id,
-
-            name:
-                data.name
-                    .toUpperCase(),
-
-            maxHp:100,
-
-            hp:100
-
-        };
+        return await response.json();
 
     }
-
     catch(error){
 
         console.error(
-            "PokeAPI error:",
+            "PokeAPI:",
             error
         );
 
-
-        return {
-
-            id:25,
-
-            name:"PIKACHU",
-
-            maxHp:100,
-
-            hp:100
-
-        };
-
+        return null;
     }
-
 }
 
 
 /* =========================================================
-   EQUIPO
+   CREAR EQUIPO
 ========================================================= */
 
 async function initTeam(){
 
     team = [];
 
+    const used =
+        new Set();
 
-    while(
-        team.length < 3
-    ){
+    while(team.length < 3){
+
+        const id =
+            random(1,1025);
+
+        if(used.has(id)){
+            continue;
+        }
+
+        used.add(id);
 
         const pokemon =
-            await getRandomPokemon();
+            await getPokemon(id);
 
-
-        if(
-            !team.some(
-                p =>
-                    p.id === pokemon.id
-            )
-        ){
-
-            team.push(
-                pokemon
-            );
-
+        if(!pokemon){
+            continue;
         }
+
+        const maxHp =
+            calculateMaxHP(pokemon);
+
+        team.push({
+
+            id:pokemon.id,
+
+            name:pokemon.name,
+
+            types:pokemon.types.map(
+                x => x.type.name
+            ),
+
+            sprite:pokemon.sprites.back_default,
+
+            frontSprite:
+                pokemon.sprites.front_default,
+
+            maxHp:maxHp,
+
+            hp:maxHp,
+
+            level:50
+
+        });
 
     }
 
+    activePokemon = 0;
 
-    teamIndex = 0;
+    updateTeamUI();
 
-
-    player =
-        Object.assign(
-            {},
-            team[0]
-        );
-
-
-    loadSprite(
-        playerImg,
-        player.id,
-        true
-    );
-
-
-    updateUI();
-
+    loadActivePokemon();
 }
 
 
 /* =========================================================
-   NUEVO ENEMIGO
+   HP
+========================================================= */
+
+function calculateMaxHP(pokemon){
+
+    const hpStat =
+        pokemon.stats.find(
+            stat =>
+                stat.stat.name === "hp"
+        );
+
+    const base =
+        hpStat
+            ? hpStat.base_stat
+            : 70;
+
+    return Math.max(
+        80,
+        Math.floor(
+            ((2 * base + 31) * 50) / 100
+        ) + 110
+    );
+}
+
+
+/* =========================================================
+   CARGAR POKÉMON ACTIVO
+========================================================= */
+
+function loadActivePokemon(){
+
+    const pokemon =
+        team[activePokemon];
+
+    if(!pokemon){
+        return;
+    }
+
+    playerName.textContent =
+        pokemon.name;
+
+    playerLevelText.textContent =
+        pokemon.level;
+
+    playerMaxHpText.textContent =
+        pokemon.maxHp;
+
+    playerHp =
+        pokemon.hp;
+
+    playerMaxHp =
+        pokemon.maxHp;
+
+    playerHpText.textContent =
+        playerHp;
+
+    playerSprite.src =
+        pokemon.sprite ||
+        (
+            SPRITE_BACK +
+            pokemon.id +
+            ".png"
+        );
+
+    updatePlayerHP();
+
+    updateTeamUI();
+}
+
+
+/* =========================================================
+   EQUIPO UI
+========================================================= */
+
+function updateTeamUI(){
+
+    for(let i=0;i<3;i++){
+
+        const slot =
+            document.getElementById(
+                "team-slot-" + i
+            );
+
+        const img =
+            document.getElementById(
+                "team-img-" + i
+            );
+
+        if(!team[i]){
+            continue;
+        }
+
+        img.src =
+            team[i].frontSprite ||
+            (
+                SPRITE_FRONT +
+                team[i].id +
+                ".png"
+            );
+
+        slot.classList.remove(
+            "active",
+            "fainted"
+        );
+
+        if(i === activePokemon){
+            slot.classList.add("active");
+        }
+
+        if(team[i].hp <= 0){
+            slot.classList.add("fainted");
+        }
+
+    }
+}
+
+
+/* =========================================================
+   ENEMIGO NUEVO
 ========================================================= */
 
 async function newEnemy(){
 
-    battleMessage.textContent =
-        "BUSCANDO POKÉMON...";
+    battleBusy = false;
+
+    /*
+     * Limpiar estado visual
+     */
+
+    enemySprite.classList.remove(
+        "fainted",
+        "hit"
+    );
+
+    playerSprite.classList.remove(
+        "fainted",
+        "hit"
+    );
 
 
-    battleMessage2.textContent =
-        "";
+    let id;
+
+    let attempts = 0;
+
+    do{
+
+        id =
+            random(1,1025);
+
+        attempts++;
+
+    }while(
+        recentEnemyIds.includes(id) &&
+        attempts < 30
+    );
+
+
+    recentEnemyIds.push(id);
+
+    if(recentEnemyIds.length > 8){
+        recentEnemyIds.shift();
+    }
 
 
     const pokemon =
-        await getRandomPokemon();
+        await getPokemon(id);
+
+    if(!pokemon){
+        return newEnemy();
+    }
 
 
-    enemy =
-        Object.assign(
-            {},
-            pokemon
+    enemy = {
+
+        id:pokemon.id,
+
+        name:pokemon.name,
+
+        types:pokemon.types.map(
+            x => x.type.name
+        ),
+
+        sprite:
+            pokemon.sprites.front_default ||
+            (
+                SPRITE_FRONT +
+                pokemon.id +
+                ".png"
+            )
+
+    };
+
+
+    /*
+     * HP enemigo
+     */
+
+    const hpStat =
+        pokemon.stats.find(
+            stat =>
+                stat.stat.name === "hp"
         );
 
+    const baseHp =
+        hpStat
+            ? hpStat.base_stat
+            : 70;
 
-    enemyLevel.textContent =
-        Math.floor(
-            Math.random()*15
-        )+10;
+    enemyMaxHp =
+        Math.max(
+            70,
+            Math.floor(
+                ((2 * baseHp + 20) * 50) / 100
+            ) + 60
+        );
+
+    enemyHp =
+        enemyMaxHp;
 
 
-    loadSprite(
-        enemyImg,
-        enemy.id,
-        false
+    /*
+     * Mostrar enemigo
+     */
+
+    enemySprite.src =
+        enemy.sprite;
+
+    enemyName.textContent =
+        "⚡ " +
+        capitalize(enemy.name);
+
+
+    updateEnemyHP();
+
+
+    /*
+     * Seleccionar escenario
+     */
+
+    selectZone(
+        enemy.types
     );
 
 
-    enemyImg.classList.remove(
-        "appear"
-    );
-
-
-    void enemyImg.offsetWidth;
-
-
-    enemyImg.classList.add(
-        "appear"
-    );
-
-
-    updateUI();
-
+    /*
+     * Mensaje
+     */
 
     battleMessage.textContent =
-        "¡UN " +
-        enemy.name +
-        " SALVAJE APARECIÓ!";
+        "¡Un " +
+        capitalize(enemy.name) +
+        " salvaje apareció!";
 
 
-    battleMessage2.textContent =
-        "USA !FIGHT";
+    battleCount++;
+
+    battleCountText.textContent =
+        battleCount;
 
 }
 
 
 /* =========================================================
-   UI
+   HP UI
 ========================================================= */
 
-function updateUI(){
+function hpColor(percent){
 
-    enemyName.textContent =
-        enemy.name;
-
-
-    enemyHpNumber.textContent =
-        enemy.hp +
-        "/" +
-        enemy.maxHp;
-
-
-    enemyHp.style.width =
-        (
-            enemy.hp /
-            enemy.maxHp *
-            100
-        ) +
-        "%";
-
-
-    if(
-        enemy.hp <= 30
-    ){
-
-        enemyHp.style.background =
-            "#e53935";
-
+    if(percent > 50){
+        return "#39c54a";
     }
 
-    else if(
-        enemy.hp <= 60
-    ){
-
-        enemyHp.style.background =
-            "#e6b82e";
-
+    if(percent > 20){
+        return "#f1c933";
     }
 
-    else{
-
-        enemyHp.style.background =
-            "#39b94a";
-
-    }
+    return "#e84949";
+}
 
 
-    playerName.textContent =
-        player.name;
+function updateEnemyHP(){
+
+    const percent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                (enemyHp / enemyMaxHp) * 100
+            )
+        );
+
+    enemyHpFill.style.width =
+        percent + "%";
+
+    enemyHpFill.style.background =
+        hpColor(percent);
+}
 
 
-    playerHpNumber.textContent =
-        player.hp +
-        "/" +
-        player.maxHp;
+function updatePlayerHP(){
 
+    const percent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                (playerHp / playerMaxHp) * 100
+            )
+        );
 
-    playerHp.style.width =
-        (
-            player.hp /
-            player.maxHp *
-            100
-        ) +
-        "%";
+    playerHpFill.style.width =
+        percent + "%";
 
+    playerHpFill.style.background =
+        hpColor(percent);
 
-    if(
-        player.hp <= 30
-    ){
+    playerHpText.textContent =
+        Math.max(
+            0,
+            Math.floor(playerHp)
+        );
 
-        playerHp.style.background =
-            "#e53935";
-
-    }
-
-    else if(
-        player.hp <= 60
-    ){
-
-        playerHp.style.background =
-            "#e6b82e";
-
-    }
-
-    else{
-
-        playerHp.style.background =
-            "#39b94a";
-
-    }
-
+    playerMaxHpText.textContent =
+        playerMaxHp;
 }
 
 
@@ -1962,46 +1971,597 @@ function updateUI(){
    DAÑO
 ========================================================= */
 
-function showDamage(
-    amount,
-    target
-){
+function calculateDamage(attackerPower = 30){
+
+    const randomMultiplier =
+        .75 +
+        Math.random() * .45;
+
+    return Math.max(
+        8,
+        Math.floor(
+            attackerPower *
+            randomMultiplier
+        )
+    );
+}
+
+
+/* =========================================================
+   ANIMACIÓN
+========================================================= */
+
+function animateHit(element){
+
+    element.classList.remove("hit");
+
+    void element.offsetWidth;
+
+    element.classList.add("hit");
+
+    setTimeout(() => {
+
+        element.classList.remove("hit");
+
+    },350);
+}
+
+
+/* =========================================================
+   ATAQUE
+========================================================= */
+
+async function fight(){
+
+    if(battleBusy){
+        return;
+    }
+
+    if(!enemy){
+        return;
+    }
+
+    if(enemyHp <= 0){
+        return;
+    }
+
+    const pokemon =
+        team[activePokemon];
+
+    if(!pokemon){
+        return;
+    }
+
+    if(playerHp <= 0){
+
+        battleMessage.textContent =
+            "¡Tu Pokémon está debilitado! Usa !pokemon.";
+
+        return;
+    }
+
+
+    battleBusy = true;
+
+    highlightCommand("fight");
+
+
+    /*
+     * Daño del jugador
+     */
 
     const damage =
-        document.createElement(
-            "div"
+        calculateDamage(
+            random(22,38)
         );
 
-
-    damage.className =
-        "damage " +
-        (
-            target === "enemy"
-                ? "enemy-damage"
-                : "player-damage"
+    enemyHp =
+        Math.max(
+            0,
+            enemyHp - damage
         );
 
+    updateEnemyHP();
 
-    damage.textContent =
-        "-" +
-        amount;
-
-
-    document
-        .querySelector(
-            ".battle"
+    animateHit(
+        document.getElementById(
+            "enemy-container"
         )
-        .appendChild(
-            damage
+    );
+
+
+    battleMessage.textContent =
+        capitalize(pokemon.name) +
+        " atacó e hizo " +
+        damage +
+        " de daño.";
+
+
+    await sleep(900);
+
+
+    /*
+     * Enemigo derrotado
+     */
+
+    if(enemyHp <= 0){
+
+        battleMessage.textContent =
+            "¡" +
+            capitalize(enemy.name) +
+            " fue derrotado!";
+
+        await sleep(1200);
+
+        await newEnemy();
+
+        return;
+    }
+
+
+    /*
+     * Contraataque
+     */
+
+    enemyAttack();
+
+}
+
+
+/* =========================================================
+   CONTRAATAQUE
+========================================================= */
+
+async function enemyAttack(){
+
+    const pokemon =
+        team[activePokemon];
+
+    if(!pokemon){
+        battleBusy = false;
+        return;
+    }
+
+    const damage =
+        calculateDamage(
+            random(16,30)
         );
 
+    playerHp =
+        Math.max(
+            0,
+            playerHp - damage
+        );
 
-    setTimeout(
-        ()=>{
-            damage.remove();
-        },
-        850
+    team[activePokemon].hp =
+        playerHp;
+
+    updatePlayerHP();
+
+    updateTeamUI();
+
+    animateHit(
+        document.getElementById(
+            "player-container"
+        )
     );
+
+    battleMessage.textContent =
+        capitalize(enemy.name) +
+        " contraatacó e hizo " +
+        damage +
+        " de daño.";
+
+    await sleep(800);
+
+
+    if(playerHp <= 0){
+
+        playerSprite.classList.add(
+            "fainted"
+        );
+
+        battleMessage.textContent =
+            "¡" +
+            capitalize(pokemon.name) +
+            " se debilitó!";
+
+        await sleep(700);
+
+        /*
+         * Intentar cambiar automáticamente
+         * si todavía existe otro Pokémon.
+         */
+
+        const next =
+            findNextAlivePokemon();
+
+        if(next !== -1){
+
+            activePokemon =
+                next;
+
+            loadActivePokemon();
+
+            battleMessage.textContent =
+                "¡Adelante, " +
+                capitalize(
+                    team[next].name
+                ) +
+                "!";
+
+        }
+        else{
+
+            battleMessage.textContent =
+                "¡Todos tus Pokémon están debilitados!";
+
+        }
+
+    }
+
+    battleBusy = false;
+}
+
+
+/* =========================================================
+   BAG
+========================================================= */
+
+async function useBag(){
+
+    if(battleBusy){
+        return;
+    }
+
+    const pokemon =
+        team[activePokemon];
+
+    if(!pokemon){
+        return;
+    }
+
+    if(playerHp <= 0){
+
+        battleMessage.textContent =
+            "No puedes curar un Pokémon debilitado.";
+
+        return;
+    }
+
+    if(playerHp >= playerMaxHp){
+
+        battleMessage.textContent =
+            "¡Tu Pokémon ya tiene toda la vida!";
+
+        return;
+    }
+
+    battleBusy = true;
+
+    highlightCommand("bag");
+
+
+    const heal =
+        Math.min(
+            random(25,40),
+            playerMaxHp - playerHp
+        );
+
+    playerHp += heal;
+
+    team[activePokemon].hp =
+        playerHp;
+
+    updatePlayerHP();
+
+    updateTeamUI();
+
+    battleMessage.textContent =
+        "¡Poción! " +
+        capitalize(pokemon.name) +
+        " recuperó " +
+        heal +
+        " HP.";
+
+    await sleep(800);
+
+    if(enemyHp > 0){
+        await enemyAttack();
+    }
+    else{
+        battleBusy = false;
+    }
+}
+
+
+/* =========================================================
+   CAMBIAR POKÉMON
+========================================================= */
+
+function findNextAlivePokemon(){
+
+    for(let i=0;i<team.length;i++){
+
+        if(
+            i !== activePokemon &&
+            team[i].hp > 0
+        ){
+            return i;
+        }
+
+    }
+
+    return -1;
+}
+
+
+async function changePokemon(){
+
+    if(battleBusy){
+        return;
+    }
+
+    const next =
+        findNextAlivePokemon();
+
+    if(next === -1){
+
+        battleMessage.textContent =
+            "No tienes otro Pokémon disponible.";
+
+        return;
+    }
+
+    battleBusy = true;
+
+    highlightCommand("pokemon");
+
+    activePokemon =
+        next;
+
+    loadActivePokemon();
+
+    battleMessage.textContent =
+        "¡Cambiaste a " +
+        capitalize(
+            team[next].name
+        ) +
+        "!";
+
+    await sleep(900);
+
+    if(enemyHp > 0){
+        await enemyAttack();
+    }
+    else{
+        battleBusy = false;
+    }
+}
+
+
+/* =========================================================
+   CAPTURAR
+========================================================= */
+
+async function catchPokemon(){
+
+    if(battleBusy){
+        return;
+    }
+
+    if(!enemy){
+        return;
+    }
+
+    if(enemyHp <= 0){
+        return;
+    }
+
+    battleBusy = true;
+
+    highlightCommand("catch");
+
+
+    /*
+     * Cuanto menos HP tenga,
+     * mayor probabilidad.
+     */
+
+    const hpPercent =
+        enemyHp / enemyMaxHp;
+
+    let chance =
+        0.18 +
+        ((1 - hpPercent) * 0.55);
+
+
+    /*
+     * Bonus si está muy debilitado.
+     */
+
+    if(hpPercent <= .25){
+        chance += .10;
+    }
+
+
+    const success =
+        Math.random() < chance;
+
+
+    if(success){
+
+        captureCount++;
+
+        captureCountText.textContent =
+            captureCount;
+
+        battleMessage.textContent =
+            "🎉 ¡Capturaste a " +
+            capitalize(enemy.name) +
+            "!";
+
+        await sleep(1500);
+
+        await newEnemy();
+
+        return;
+    }
+
+
+    battleMessage.textContent =
+        "¡La Poké Ball falló!";
+
+    await sleep(800);
+
+    if(enemyHp > 0){
+        await enemyAttack();
+    }
+    else{
+        battleBusy = false;
+    }
+}
+
+
+/* =========================================================
+   ESCAPAR
+========================================================= */
+
+async function runAway(){
+
+    if(battleBusy){
+        return;
+    }
+
+    if(!enemy){
+        return;
+    }
+
+    battleBusy = true;
+
+    highlightCommand("run");
+
+
+    const success =
+        Math.random() < .75;
+
+
+    if(success){
+
+        battleMessage.textContent =
+            "¡Escapaste del combate!";
+
+        await sleep(1000);
+
+        await newEnemy();
+
+        return;
+    }
+
+
+    battleMessage.textContent =
+        "¡No pudiste escapar!";
+
+    await sleep(700);
+
+    await enemyAttack();
+}
+
+
+/* =========================================================
+   COMANDOS
+========================================================= */
+
+function processCommand(
+    username,
+    message
+){
+
+    const clean =
+        message
+            .trim()
+            .toLowerCase();
+
+
+    /*
+     * Mostrar TODOS los mensajes
+     * en el chat visual.
+     */
+
+    addChatMessage(
+        username,
+        message
+    );
+
+
+    /*
+     * Contador de usuarios.
+     */
+
+    if(!uniqueUsers.has(username)){
+
+        uniqueUsers.add(username);
+
+        uniqueUsersText.textContent =
+            uniqueUsers.size;
+
+    }
+
+
+    /*
+     * Sólo comandos.
+     */
+
+    if(!clean.startsWith("!")){
+        return;
+    }
+
+
+    if(
+        clean === "!fight" ||
+        clean === "!f"
+    ){
+
+        fight();
+
+    }
+
+    else if(
+        clean === "!bag" ||
+        clean === "!item" ||
+        clean === "!potion"
+    ){
+
+        useBag();
+
+    }
+
+    else if(
+        clean === "!pokemon" ||
+        clean === "!poke"
+    ){
+
+        changePokemon();
+
+    }
+
+    else if(
+        clean === "!catch" ||
+        clean === "!pokeball"
+    ){
+
+        catchPokemon();
+
+    }
+
+    else if(
+        clean === "!run" ||
+        clean === "!escape"
+    ){
+
+        runAway();
+
+    }
 
 }
 
@@ -2010,73 +2570,48 @@ function showDamage(
    CHAT VISUAL
 ========================================================= */
 
-function escapeHtml(
-    text
-){
-
-    return String(text)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-function addChat(
-    user,
+function addChatMessage(
+    username,
     message
 ){
 
-    const row =
-        document.createElement(
-            "div"
-        );
+    const line =
+        document.createElement("div");
+
+    line.className =
+        "chat-line";
+
+    const user =
+        document.createElement("span");
+
+    user.className =
+        "chat-user";
+
+    user.textContent =
+        username + ": ";
+
+    const text =
+        document.createElement("span");
+
+    text.textContent =
+        message;
+
+    line.appendChild(user);
+    line.appendChild(text);
+
+    chatFeed.appendChild(line);
 
 
-    row.innerHTML =
-        '<span style="color:#63d9ff">@' +
-        escapeHtml(user) +
-        "</span> " +
-        escapeHtml(message);
-
-
-    chatFeed.prepend(
-        row
-    );
-
-
-    while(
-        chatFeed.children.length > 6
-    ){
+    while(chatFeed.children.length > 5){
 
         chatFeed.removeChild(
-            chatFeed.lastChild
+            chatFeed.firstChild
         );
 
     }
 
+    chatFeed.scrollTop =
+        chatFeed.scrollHeight;
 }
 
 
@@ -2084,683 +2619,56 @@ function addChat(
    BOTONES
 ========================================================= */
 
-function clearButtons(){
+function highlightCommand(command){
 
-    fightButton.classList.remove(
-        "active"
-    );
+    const buttons = {
 
-    bagButton.classList.remove(
-        "active"
-    );
+        fight:
+            document.getElementById(
+                "btn-fight"
+            ),
 
-    pokemonButton.classList.remove(
-        "active"
-    );
+        bag:
+            document.getElementById(
+                "btn-bag"
+            ),
 
-    runButton.classList.remove(
-        "active"
-    );
+        pokemon:
+            document.getElementById(
+                "btn-pokemon"
+            ),
 
+        run:
+            document.getElementById(
+                "btn-run"
+            )
+
+    };
+
+
+    const button =
+        buttons[command];
+
+    if(!button){
+        return;
+    }
+
+    button.classList.add("active");
+
+    setTimeout(() => {
+
+        button.classList.remove("active");
+
+    },350);
 }
 
 
-function highlightCommand(
-    command
-){
+function buttonCommand(command){
 
-    clearTimeout(
-        activeTimer
-    );
-
-
-    clearButtons();
-
-
-    const c =
-        command
-            .toLowerCase()
-            .trim();
-
-
-    let button = null;
-
-
-    if(
-        c === "!fight" ||
-        c === "!f"
-    ){
-
-        button =
-            fightButton;
-
-    }
-
-    else if(
-
-        c === "!bag" ||
-        c === "!item" ||
-        c === "!potion" ||
-        c === "!catch" ||
-        c === "!pokeball"
-
-    ){
-
-        button =
-            bagButton;
-
-    }
-
-    else if(
-
-        c === "!pokemon" ||
-        c === "!poke"
-
-    ){
-
-        button =
-            pokemonButton;
-
-    }
-
-    else if(
-
-        c === "!run" ||
-        c === "!escape"
-
-    ){
-
-        button =
-            runButton;
-
-    }
-
-
-    if(button){
-
-        button.classList.add(
-            "active"
-        );
-
-
-        activeTimer =
-            setTimeout(
-                ()=>{
-                    button.classList.remove(
-                        "active"
-                    );
-                },
-                900
-            );
-
-    }
-
-}
-
-
-/* =========================================================
-   ATAQUE ENEMIGO
-========================================================= */
-
-function enemyAttack(){
-
-    if(
-        enemy.hp <= 0
-    ){
-
-        return;
-
-    }
-
-
-    const damage =
-        Math.floor(
-            Math.random()*10
-        )+5;
-
-
-    player.hp =
-        Math.max(
-            0,
-            player.hp - damage
-        );
-
-
-    showDamage(
-        damage,
-        "player"
-    );
-
-
-    updateUI();
-
-
-    if(
-        player.hp <= 0
-    ){
-
-        battleMessage.textContent =
-            player.name +
-            " HA CAÍDO";
-
-
-        battleMessage2.textContent =
-            "!pokemon PARA CAMBIAR";
-
-    }
-
-    else{
-
-        battleMessage.textContent =
-            enemy.name +
-            " ATACA";
-
-
-        battleMessage2.textContent =
-            "-" +
-            damage +
-            " HP";
-
-    }
-
-}
-
-
-/* =========================================================
-   FIGHT
-========================================================= */
-
-function fight(
-    user
-){
-
-    if(
-        enemy.hp <= 0
-    ){
-
-        return;
-
-    }
-
-
-    const damage =
-        Math.floor(
-            Math.random()*16
-        )+8;
-
-
-    enemy.hp =
-        Math.max(
-            0,
-            enemy.hp - damage
-        );
-
-
-    showDamage(
-        damage,
-        "enemy"
-    );
-
-
-    battleMessage.textContent =
-        "@" +
-        user +
-        " USA FIGHT";
-
-
-    battleMessage2.textContent =
-        player.name +
-        " -" +
-        damage +
-        " HP";
-
-
-    updateUI();
-
-
-    if(
-        enemy.hp <= 0
-    ){
-
-        battleMessage.textContent =
-            "¡" +
-            enemy.name +
-            " DERROTADO!";
-
-
-        battleMessage2.textContent =
-            "NUEVO ENEMIGO...";
-
-
-        setTimeout(
-            newEnemy,
-            1500
-        );
-
-
-        return;
-
-    }
-
-
-    setTimeout(
-        enemyAttack,
-        500
-    );
-
-}
-
-
-/* =========================================================
-   BAG
-========================================================= */
-
-function useBag(
-    user
-){
-
-    if(
-        items.potion <= 0
-    ){
-
-        battleMessage.textContent =
-            "¡NO QUEDAN POCIONES!";
-
-        battleMessage2.textContent =
-            "";
-
-        return;
-
-    }
-
-
-    if(
-        player.hp >= player.maxHp
-    ){
-
-        battleMessage.textContent =
-            "HP YA ESTÁ LLENO";
-
-        battleMessage2.textContent =
-            "";
-
-        return;
-
-    }
-
-
-    items.potion--;
-
-
-    const heal =
-        Math.min(
-            30,
-            player.maxHp -
-            player.hp
-        );
-
-
-    player.hp +=
-        heal;
-
-
-    updateUI();
-
-
-    battleMessage.textContent =
-        "@" +
-        user +
-        " USA POTION";
-
-
-    battleMessage2.textContent =
-        "+" +
-        heal +
-        " HP";
-
-
-    setTimeout(
-        enemyAttack,
-        500
-    );
-
-}
-
-
-/* =========================================================
-   CAMBIAR POKÉMON
-========================================================= */
-
-function changePokemon(
-    user
-){
-
-    if(
-        team.length === 0
-    ){
-
-        return;
-
-    }
-
-
-    teamIndex =
-        (
-            teamIndex + 1
-        ) %
-        team.length;
-
-
-    player =
-        Object.assign(
-            {},
-            team[teamIndex],
-            {
-                maxHp:100,
-                hp:100
-            }
-        );
-
-
-    loadSprite(
-        playerImg,
-        player.id,
-        true
-    );
-
-
-    updateUI();
-
-
-    battleMessage.textContent =
-        "@" +
-        user +
-        " CAMBIA A";
-
-
-    battleMessage2.textContent =
-        player.name;
-
-
-    setTimeout(
-        enemyAttack,
-        500
-    );
-
-}
-
-
-/* =========================================================
-   CAPTURAR
-========================================================= */
-
-function catchPokemon(
-    user
-){
-
-    if(
-        items.pokeball <= 0
-    ){
-
-        battleMessage.textContent =
-            "¡NO QUEDAN POKÉBALLS!";
-
-        battleMessage2.textContent =
-            "";
-
-        return;
-
-    }
-
-
-    items.pokeball--;
-
-
-    const chance =
-        0.2 +
-        (
-            1 -
-            enemy.hp /
-            enemy.maxHp
-        ) *
-        0.6;
-
-
-    if(
-        Math.random() < chance
-    ){
-
-        battleMessage.textContent =
-            "¡POKÉMON CAPTURADO!";
-
-
-        battleMessage2.textContent =
-            "@" +
-            user +
-            " ATRAPÓ " +
-            enemy.name;
-
-
-        setTimeout(
-            newEnemy,
-            1600
-        );
-
-    }
-
-    else{
-
-        battleMessage.textContent =
-            "¡SE ESCAPÓ!";
-
-
-        battleMessage2.textContent =
-            "@" +
-            user +
-            " FALLÓ";
-
-
-        setTimeout(
-            enemyAttack,
-            500
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   RUN
-========================================================= */
-
-function run(
-    user
-){
-
-    battleMessage.textContent =
-        "@" +
-        user +
-        " INTENTA ESCAPAR";
-
-
-    battleMessage2.textContent =
-        "...";
-
-
-    if(
-        Math.random() < 0.75
-    ){
-
-        setTimeout(
-            newEnemy,
-            800
-        );
-
-    }
-
-    else{
-
-        battleMessage.textContent =
-            "¡NO PUEDES ESCAPAR!";
-
-
-        battleMessage2.textContent =
-            "";
-
-
-        setTimeout(
-            enemyAttack,
-            500
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PROCESAR CHAT
-========================================================= */
-
-function processCommand(
-    user,
-    message
-){
-
-    const command =
-        message
-            .trim()
-            .toLowerCase();
-
-
-    addChat(
-        user,
-        message
-    );
-
-
-    users.add(
-        user
-    );
-
-
-    playersCount.textContent =
-        users.size;
-
-
-    if(
-        !command.startsWith("!")
-    ){
-
-        return;
-
-    }
-
-
-    const now =
-        Date.now();
-
-
-    if(
-        now -
-        lastCommand <
-        COMMAND_COOLDOWN
-    ){
-
-        return;
-
-    }
-
-
-    lastCommand =
-        now;
-
-
-    highlightCommand(
+    processCommand(
+        "STREAM",
         command
     );
-
-
-    if(
-
-        command === "!fight" ||
-        command === "!f"
-
-    ){
-
-        fight(
-            user
-        );
-
-        return;
-
-    }
-
-
-    if(
-
-        command === "!bag" ||
-        command === "!item" ||
-        command === "!potion"
-
-    ){
-
-        useBag(
-            user
-        );
-
-        return;
-
-    }
-
-
-    if(
-
-        command === "!pokemon" ||
-        command === "!poke"
-
-    ){
-
-        changePokemon(
-            user
-        );
-
-        return;
-
-    }
-
-
-    if(
-
-        command === "!catch" ||
-        command === "!pokeball"
-
-    ){
-
-        catchPokemon(
-            user
-        );
-
-        return;
-
-    }
-
-
-    if(
-
-        command === "!run" ||
-        command === "!escape"
-
-    ){
-
-        run(
-            user
-        );
-
-        return;
-
-    }
 
 }
 
@@ -2771,54 +2679,17 @@ function processCommand(
 
 function connectTwitch(){
 
-    const insideIframe =
-        window.self !== window.top;
-
-
     console.log(
-        "================================"
-    );
-
-    console.log(
-        "POKEMON TWITCH PLAYS"
-    );
-
-    console.log(
-        "URL:",
-        window.location.href
-    );
-
-    console.log(
-        "Dentro de iframe:",
-        insideIframe
-    );
-
-    console.log(
-        "Canal:",
+        "Conectando a Twitch:",
         CHANNEL
     );
-
-    console.log(
-        "TMI disponible:",
-        typeof tmi !== "undefined"
-    );
-
-    console.log(
-        "================================"
-    );
-
 
     connectionStatus.textContent =
         "● CONECTANDO TWITCH...";
 
-
     connectionStatus.className =
-        "";
+        "status connecting";
 
-
-    /*
-       UNA SOLA CONEXIÓN TMI
-    */
 
     const client =
         new tmi.Client({
@@ -2840,96 +2711,45 @@ function connectTwitch(){
         });
 
 
-    /*
-       CONNECTING
-    */
-
     client.on(
         "connecting",
-        (
-            address,
-            port
-        )=>{
+        (server,port) => {
 
             console.log(
-                "Twitch: connecting...",
-                address,
+                "Twitch connecting:",
+                server,
                 port
             );
-
 
             connectionStatus.textContent =
                 "● CONECTANDO TWITCH...";
 
-
             connectionStatus.className =
-                "";
+                "status connecting";
 
         }
     );
 
 
-    /*
-       CONNECTED
-    */
-
     client.on(
         "connected",
-        (
-            address,
-            port
-        )=>{
+        (address,port) => {
 
             console.log(
-                "================================"
-            );
-
-            console.log(
-                "TWITCH CONECTADO"
-            );
-
-            console.log(
-                "Canal:",
-                CHANNEL
-            );
-
-            console.log(
-                "Servidor:",
-                address
-            );
-
-            console.log(
-                "Puerto:",
+                "TWITCH CONECTADO:",
+                address,
                 port
             );
-
-            console.log(
-                "================================"
-            );
-
 
             connectionStatus.textContent =
                 "● TWITCH CONECTADO";
 
-
             connectionStatus.className =
-                "ok";
-
-
-            battleMessage.textContent =
-                "¡CHAT CONECTADO!";
-
-
-            battleMessage2.textContent =
-                "USA !FIGHT";
+                "status connected";
 
         }
     );
 
-
-    /*
-       MENSAJES
-    */
 
     client.on(
         "message",
@@ -2938,57 +2758,16 @@ function connectTwitch(){
             tags,
             message,
             self
-        )=>{
+        ) => {
 
-            console.log(
-                "================================"
-            );
-
-            console.log(
-                "MENSAJE TWITCH RECIBIDO"
-            );
-
-            console.log(
-                "Canal:",
-                channel
-            );
-
-            console.log(
-                "Usuario:",
-                tags["display-name"] ||
-                tags.username ||
-                "usuario"
-            );
-
-            console.log(
-                "Mensaje:",
-                message
-            );
-
-            console.log(
-                "Self:",
-                self
-            );
-
-            console.log(
-                "================================"
-            );
-
-
-            if(
-                self
-            ){
-
+            if(self){
                 return;
-
             }
-
 
             const username =
                 tags["display-name"] ||
                 tags.username ||
-                "usuario";
-
+                "Twitch";
 
             processCommand(
                 username,
@@ -2999,60 +2778,38 @@ function connectTwitch(){
     );
 
 
-    /*
-       RECONNECT
-    */
-
     client.on(
         "reconnect",
-        ()=>{
-
-            console.log(
-                "Twitch: reconnect..."
-            );
-
+        () => {
 
             connectionStatus.textContent =
                 "● RECONECTANDO...";
 
-
             connectionStatus.className =
-                "";
+                "status connecting";
 
         }
     );
 
 
-    /*
-       DISCONNECTED
-    */
-
     client.on(
         "disconnected",
-        (
-            reason
-        )=>{
+        reason => {
 
-            console.warn(
+            console.log(
                 "Twitch desconectado:",
                 reason
             );
 
-
             connectionStatus.textContent =
                 "● TWITCH DESCONECTADO";
 
-
             connectionStatus.className =
-                "error";
+                "status error";
 
         }
     );
 
-
-    /*
-       NOTICE
-    */
 
     client.on(
         "notice",
@@ -3060,11 +2817,10 @@ function connectTwitch(){
             channel,
             msgid,
             message
-        )=>{
+        ) => {
 
-            console.warn(
+            console.log(
                 "Twitch notice:",
-                channel,
                 msgid,
                 message
             );
@@ -3073,247 +2829,93 @@ function connectTwitch(){
     );
 
 
-    /*
-       CONEXIÓN INMEDIATA
-    */
+    client.connect()
+        .then(() => {
 
-    console.log(
-        "Intentando conectar a:",
-        CHANNEL
-    );
+            console.log(
+                "Solicitud de conexión enviada."
+            );
 
+        })
+        .catch(error => {
 
-    client
-        .connect()
+            console.error(
+                "Error Twitch:",
+                error
+            );
 
-        .then(
-            ()=>{
+            connectionStatus.textContent =
+                "● ERROR TWITCH";
 
-                console.log(
-                    "TMI connect() OK"
-                );
+            connectionStatus.className =
+                "status error";
 
-            }
-        )
-
-        .catch(
-            error=>{
-
-                console.error(
-                    "TMI connection error:",
-                    error
-                );
-
-
-                connectionStatus.textContent =
-                    "● ERROR TWITCH";
-
-
-                connectionStatus.className =
-                    "error";
-
-            }
-        );
+        });
 
 }
 
 
 /* =========================================================
-   CLIMA
+   SLEEP
 ========================================================= */
 
-const WEATHER_LAT =
-    19.4326;
+function sleep(ms){
 
-const WEATHER_LON =
-    -99.1332;
-
-
-function isNight(){
-
-    const hour =
-        new Date().getHours();
-
-
-    return (
-        hour >= 19 ||
-        hour < 6
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
     );
 
 }
 
 
-function applyWeather(
-    type
-){
+/* =========================================================
+   CAMBIO AUTOMÁTICO DE DÍA / NOCHE
+========================================================= */
 
-    background.classList.remove(
-        "sunny",
-        "cloudy",
-        "rainy",
-        "night"
-    );
+let lastTimeId =
+    getTimeOfDay().id;
 
 
-    background.classList.add(
-        type
-    );
+function checkTimeChange(){
 
+    const current =
+        getTimeOfDay();
 
-    if(
-        type === "night"
-    ){
+    if(current.id !== lastTimeId){
 
-        weatherText.textContent =
-            "🌙 NOCHE";
+        lastTimeId =
+            current.id;
 
-    }
+        updateWeather();
 
-    else if(
-        type === "rainy"
-    ){
+        /*
+         * Si estamos en una batalla,
+         * actualizamos la apariencia
+         * del escenario sin cambiar
+         * necesariamente la zona.
+         */
 
-        weatherText.textContent =
-            "🌧️ LLUVIA";
+        if(current.id === "night"){
 
-    }
-
-    else if(
-        type === "cloudy"
-    ){
-
-        weatherText.textContent =
-            "☁️ NUBLADO";
-
-    }
-
-    else{
-
-        weatherText.textContent =
-            "☀️ SOLEADO";
-
-    }
-
-}
-
-
-function fallbackWeather(){
-
-    if(
-        isNight()
-    ){
-
-        applyWeather(
-            "night"
-        );
-
-    }
-
-    else{
-
-        applyWeather(
-            "sunny"
-        );
-
-    }
-
-}
-
-
-async function updateWeather(){
-
-    if(
-        isNight()
-    ){
-
-        applyWeather(
-            "night"
-        );
-
-        return;
-
-    }
-
-
-    try{
-
-        const url =
-            "https://api.open-meteo.com/v1/forecast" +
-            "?latitude=" +
-            WEATHER_LAT +
-            "&longitude=" +
-            WEATHER_LON +
-            "&current=weather_code" +
-            "&timezone=auto";
-
-
-        const response =
-            await fetch(
-                url
-            );
-
-
-        const data =
-            await response.json();
-
-
-        const code =
-            data.current &&
-            data.current.weather_code;
-
-
-        if(
-            code === 0 ||
-            code === 1
-        ){
-
-            applyWeather(
-                "sunny"
+            battleField.classList.add(
+                "night"
             );
 
         }
-
-        else if(
-            code === 2 ||
-            code === 3
-        ){
-
-            applyWeather(
-                "cloudy"
-            );
-
-        }
-
-        else if(
-            code >= 51 &&
-            code <= 99
-        ){
-
-            applyWeather(
-                "rainy"
-            );
-
-        }
-
         else{
 
-            applyWeather(
-                "cloudy"
+            battleField.classList.remove(
+                "night"
             );
 
         }
 
-    }
-
-    catch(error){
-
-        console.warn(
-            "Weather error:",
-            error
-        );
-
-
-        fallbackWeather();
+        timeNameText.textContent =
+            current.name;
 
     }
 
@@ -3321,34 +2923,48 @@ async function updateWeather(){
 
 
 /* =========================================================
-   INICIO
+   START
 ========================================================= */
 
 async function start(){
 
-    /*
-       IMPORTANTE:
-       Twitch se conecta PRIMERO.
-       No esperamos a PokeAPI.
-    */
-
     console.log(
-        "Iniciando conexión de Twitch..."
+        "================================"
     );
 
+    console.log(
+        "POKEMON TWITCH BATTLE"
+    );
+
+    console.log(
+        "Canal:",
+        CHANNEL
+    );
+
+    console.log(
+        "================================"
+    );
+
+
+    /*
+     * Twitch inmediatamente.
+     */
 
     connectTwitch();
 
 
     /*
-       CLIMA
-    */
+     * Clima.
+     */
 
     fallbackWeather();
 
-
     updateWeather();
 
+
+    /*
+     * Actualizar clima cada 10 minutos.
+     */
 
     setInterval(
         updateWeather,
@@ -3357,15 +2973,25 @@ async function start(){
 
 
     /*
-       CARGAR EQUIPO
-    */
+     * Revisar día/noche cada minuto.
+     */
+
+    setInterval(
+        checkTimeChange,
+        60 * 1000
+    );
+
+
+    /*
+     * Crear equipo.
+     */
 
     await initTeam();
 
 
     /*
-       CARGAR ENEMIGO
-    */
+     * Crear primer enemigo.
+     */
 
     await newEnemy();
 
@@ -3377,5 +3003,4 @@ start();
 </script>
 
 </body>
-
 </html>
