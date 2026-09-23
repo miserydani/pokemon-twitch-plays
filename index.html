@@ -46,7 +46,7 @@ body{
 
 
 /* =========================================================
-   FONDO DEL ESCENARIO
+   FONDO
 ========================================================= */
 
 .background{
@@ -67,10 +67,68 @@ body{
             #b7e59b 72%,
             #6cc66a 100%
         );
+
+    transition:
+        background 1.5s ease;
 }
 
 
-/* NUBES */
+/* =========================================================
+   CLIMA
+========================================================= */
+
+.background.sunny{
+
+    background:
+        linear-gradient(
+            #45c7e5 0%,
+            #91dfe0 45%,
+            #b9e59b 72%,
+            #6cc66a 100%
+        );
+
+}
+
+.background.cloudy{
+
+    background:
+        linear-gradient(
+            #7eabb5 0%,
+            #a8c2c4 45%,
+            #9bb98b 72%,
+            #679b63 100%
+        );
+
+}
+
+.background.rainy{
+
+    background:
+        linear-gradient(
+            #526d79 0%,
+            #718991 45%,
+            #76906f 72%,
+            #506d50 100%
+        );
+
+}
+
+.background.night{
+
+    background:
+        linear-gradient(
+            #101b3c 0%,
+            #1d3156 42%,
+            #294a45 72%,
+            #203b2b 100%
+        );
+
+}
+
+
+/* =========================================================
+   NUBES
+========================================================= */
 
 .cloud{
     position:absolute;
@@ -80,6 +138,9 @@ body{
     border-radius:50%;
 
     filter:blur(1px);
+
+    transition:
+        opacity 1s ease;
 }
 
 .c1{
@@ -95,11 +156,140 @@ body{
     height:45px;
 
     top:75px;
-    right:300px;
+    left:335px;
+}
+
+.cloudy .cloud{
+    opacity:.9;
+}
+
+.night .cloud{
+    opacity:.12;
 }
 
 
-/* MONTAÑAS */
+/* =========================================================
+   LUNA
+========================================================= */
+
+.moon{
+
+    position:absolute;
+
+    width:48px;
+    height:48px;
+
+    right:300px;
+    top:35px;
+
+    border-radius:50%;
+
+    background:#fff3bd;
+
+    box-shadow:
+        0 0 18px rgba(255,245,190,.7);
+
+    opacity:0;
+
+    transition:
+        opacity 1s ease;
+}
+
+.night .moon{
+    opacity:1;
+}
+
+
+/* =========================================================
+   ESTRELLAS
+========================================================= */
+
+.stars{
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:150px;
+
+    opacity:0;
+
+    transition:
+        opacity 1s ease;
+
+    background-image:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.9) 1px,
+            transparent 2px
+        );
+
+    background-size:
+        43px 37px;
+}
+
+.night .stars{
+    opacity:.8;
+}
+
+
+/* =========================================================
+   LLUVIA
+========================================================= */
+
+.rain{
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:365px;
+
+    pointer-events:none;
+
+    opacity:0;
+
+    transition:
+        opacity 1s ease;
+
+    background:
+        repeating-linear-gradient(
+            110deg,
+            transparent 0 18px,
+            rgba(220,245,255,.28) 19px,
+            transparent 21px 34px
+        );
+
+    animation:
+        rainMove .7s linear infinite;
+}
+
+.rainy .rain{
+    opacity:.65;
+}
+
+@keyframes rainMove{
+
+    from{
+        background-position:
+            0 0;
+    }
+
+    to{
+        background-position:
+            -40px 60px;
+    }
+
+}
+
+
+/* =========================================================
+   MONTAÑAS
+========================================================= */
 
 .mountain{
     position:absolute;
@@ -114,6 +304,9 @@ body{
     border-bottom:145px solid #7bb4b0;
 
     opacity:.8;
+
+    transition:
+        border-bottom-color 1.5s ease;
 }
 
 .m1{
@@ -126,10 +319,21 @@ body{
     border-bottom-color:#69aaa8;
 }
 
+.night .mountain{
+    border-bottom-color:#314e59;
+}
 
-/* ÁRBOLES */
+.night .m2{
+    border-bottom-color:#29434b;
+}
+
+
+/* =========================================================
+   ÁRBOLES
+========================================================= */
 
 .trees{
+
     position:absolute;
 
     bottom:105px;
@@ -153,6 +357,9 @@ body{
             #438e43 0 40%,
             transparent 41%
         );
+
+    transition:
+        filter 1.5s ease;
 }
 
 .trees.left{
@@ -163,10 +370,19 @@ body{
     right:245px;
 }
 
+.night .trees{
+    filter:
+        brightness(.45)
+        saturate(.7);
+}
 
-/* SUELO */
+
+/* =========================================================
+   SUELO
+========================================================= */
 
 .ground{
+
     position:absolute;
 
     bottom:0;
@@ -182,12 +398,24 @@ body{
             #63b95b 9px 14px,
             #91d36d 14px 20px
         );
+
+    transition:
+        filter 1.5s ease;
+}
+
+.night .ground{
+    filter:
+        brightness(.45)
+        saturate(.75);
 }
 
 
-/* CAMINO */
+/* =========================================================
+   CAMINO
+========================================================= */
 
 .path{
+
     position:absolute;
 
     left:135px;
@@ -203,12 +431,23 @@ body{
         rotateX(35deg);
 
     opacity:.7;
+
+    transition:
+        filter 1.5s ease;
+}
+
+.night .path{
+    filter:
+        brightness(.5);
 }
 
 
-/* PASTO */
+/* =========================================================
+   PASTO
+========================================================= */
 
 .grass-patch{
+
     position:absolute;
 
     background:#5eaf54;
@@ -219,22 +458,32 @@ body{
 
     box-shadow:
         inset 0 -8px 0 #4b9545;
+
+    transition:
+        filter 1.5s ease;
 }
 
 .enemy-grass{
-    width:340px;
-    height:82px;
 
-    right:12px;
+    width:320px;
+    height:78px;
+
+    left:255px;
     bottom:82px;
 }
 
 .player-grass{
+
     width:350px;
     height:84px;
 
     left:5px;
     bottom:18px;
+}
+
+.night .grass-patch{
+    filter:
+        brightness(.48);
 }
 
 
@@ -243,6 +492,7 @@ body{
 ========================================================= */
 
 .pokemon{
+
     position:absolute;
 
     z-index:5;
@@ -251,9 +501,12 @@ body{
 
     align-items:center;
     justify-content:center;
+
+    pointer-events:none;
 }
 
 .pokemon img{
+
     image-rendering:pixelated;
 
     object-fit:contain;
@@ -268,20 +521,17 @@ body{
 }
 
 
-/*
+/* =========================================================
    ENEMIGO
-
-   Más arriba para que quede
-   completamente visible.
-*/
+========================================================= */
 
 .enemy-pokemon{
 
     width:250px;
     height:250px;
 
-    right:55px;
-    top:70px;
+    left:275px;
+    top:65px;
 }
 
 .enemy-pokemon img{
@@ -294,20 +544,17 @@ body{
 }
 
 
-/*
+/* =========================================================
    JUGADOR
-
-   Subido bastante para que
-   no quede detrás del menú.
-*/
+========================================================= */
 
 .player-pokemon{
 
     width:250px;
     height:250px;
 
-    left:45px;
-    bottom:125px;
+    left:25px;
+    bottom:118px;
 }
 
 .player-pokemon img{
@@ -350,7 +597,7 @@ body{
 }
 
 
-/* STATUS ENEMIGO */
+/* ENEMIGO */
 
 .enemy-status{
 
@@ -362,7 +609,7 @@ body{
 }
 
 
-/* STATUS JUGADOR */
+/* JUGADOR */
 
 .player-status{
 
@@ -462,7 +709,7 @@ body{
     top:10px;
 
     width:212px;
-    height:350px;
+    height:340px;
 
     background:
         rgba(22,43,52,.96);
@@ -514,6 +761,8 @@ body{
     font-size:14px;
 
     color:#ffdd6b;
+
+    white-space:nowrap;
 }
 
 .players{
@@ -545,7 +794,7 @@ body{
 
 
 /* =========================================================
-   MENÚ INFERIOR
+   MENÚ
 ========================================================= */
 
 .battle-menu{
@@ -674,12 +923,6 @@ body{
     background:#5a8fc5;
 }
 
-
-/*
-   NINGÚN BOTÓN ESTÁ
-   SELECCIONADO AL INICIO
-*/
-
 .battle-button.active{
 
     outline:4px solid white;
@@ -695,7 +938,7 @@ body{
 
 
 /* =========================================================
-   ESTADO TWITCH
+   CONEXIÓN
 ========================================================= */
 
 #connectionStatus{
@@ -755,7 +998,7 @@ body{
 
 .enemy-damage{
 
-    right:145px;
+    left:360px;
     top:135px;
 }
 
@@ -798,7 +1041,6 @@ body{
 
 }
 
-
 @keyframes float{
 
     0%,100%{
@@ -810,7 +1052,6 @@ body{
     }
 
 }
-
 
 @keyframes appear{
 
@@ -858,11 +1099,19 @@ body{
      FONDO
 ====================================================== -->
 
-<div class="background">
+<div
+    id="background"
+    class="background">
+
+    <div class="stars"></div>
+
+    <div class="moon"></div>
 
     <div class="cloud c1"></div>
 
     <div class="cloud c2"></div>
+
+    <div class="rain"></div>
 
     <div class="mountain m1"></div>
 
@@ -907,7 +1156,6 @@ body{
 
     </div>
 
-
     <div class="hp-row">
 
         <span>
@@ -924,7 +1172,6 @@ body{
         </div>
 
     </div>
-
 
     <div
         class="hp-number"
@@ -987,7 +1234,6 @@ body{
 
     </div>
 
-
     <div class="hp-row">
 
         <span>
@@ -1004,7 +1250,6 @@ body{
         </div>
 
     </div>
-
 
     <div
         class="hp-number"
@@ -1023,7 +1268,6 @@ body{
 
 <div class="side-panel">
 
-
     <div class="side-heading">
         ZONA ACTUAL
     </div>
@@ -1032,21 +1276,21 @@ body{
         RUTA 1
     </div>
 
-
     <div class="separator"></div>
-
 
     <div class="side-heading">
         CLIMA
     </div>
 
-    <div class="weather">
-        ☀ &nbsp;SOLEADO
+    <div
+        class="weather"
+        id="weatherText">
+
+        ☀️ SOLEADO
+
     </div>
 
-
     <div class="separator"></div>
-
 
     <div class="side-heading">
         JUGADORES
@@ -1060,14 +1304,11 @@ body{
 
     </div>
 
-
     <div class="separator"></div>
-
 
     <div class="side-heading">
         ÚLTIMOS COMANDOS
     </div>
-
 
     <div
         class="fake-chat"
@@ -1079,7 +1320,6 @@ body{
 
     </div>
 
-
 </div>
 
 
@@ -1088,7 +1328,6 @@ body{
 ====================================================== -->
 
 <div class="battle-menu">
-
 
     <div class="question">
 
@@ -1111,7 +1350,6 @@ body{
 
     <div class="buttons">
 
-
         <div
             id="fightButton"
             class="battle-button fight">
@@ -1119,7 +1357,6 @@ body{
             ▶ FIGHT
 
         </div>
-
 
         <div
             id="bagButton"
@@ -1129,7 +1366,6 @@ body{
 
         </div>
 
-
         <div
             id="pokemonButton"
             class="battle-button pokemon-button">
@@ -1137,7 +1373,6 @@ body{
             POKÉMON
 
         </div>
-
 
         <div
             id="runButton"
@@ -1147,9 +1382,7 @@ body{
 
         </div>
 
-
     </div>
-
 
 </div>
 
@@ -1170,12 +1403,18 @@ body{
 
 <script>
 
-
 /* =========================================================
    CONFIGURACIÓN
 ========================================================= */
 
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
 const CHANNEL =
+    params.get("channel")
+    ||
     "rubius";
 
 
@@ -1186,9 +1425,22 @@ const COMMAND_COOLDOWN =
 let lastCommand =
     0;
 
-
 let activeTimer =
     null;
+
+
+/*
+   Coordenadas utilizadas para
+   consultar el clima.
+
+   CDMX como ubicación base.
+*/
+
+const WEATHER_LAT =
+    19.4326;
+
+const WEATHER_LON =
+    -99.1332;
 
 
 /* =========================================================
@@ -1246,118 +1498,398 @@ let items={
    ELEMENTOS
 ========================================================= */
 
+const background =
+    document.getElementById(
+        "background"
+    );
+
+const weatherText =
+    document.getElementById(
+        "weatherText"
+    );
+
 const enemyImg =
     document.getElementById(
         "enemyImg"
     );
-
 
 const enemyName =
     document.getElementById(
         "enemyName"
     );
 
-
 const enemyLevel =
     document.getElementById(
         "enemyLevel"
     );
-
 
 const enemyHp =
     document.getElementById(
         "enemyHp"
     );
 
-
 const enemyHpNumber =
     document.getElementById(
         "enemyHpNumber"
     );
-
 
 const playerImg =
     document.getElementById(
         "playerImg"
     );
 
-
 const playerName =
     document.getElementById(
         "playerName"
     );
-
 
 const playerLevel =
     document.getElementById(
         "playerLevel"
     );
 
-
 const playerHp =
     document.getElementById(
         "playerHp"
     );
-
 
 const playerHpNumber =
     document.getElementById(
         "playerHpNumber"
     );
 
-
 const playersCount =
     document.getElementById(
         "playersCount"
     );
-
 
 const chatFeed =
     document.getElementById(
         "chatFeed"
     );
 
-
 const battleMessage =
     document.getElementById(
         "battleMessage"
     );
-
 
 const battleMessage2 =
     document.getElementById(
         "battleMessage2"
     );
 
-
 const connectionStatus =
     document.getElementById(
         "connectionStatus"
     );
-
 
 const fightButton =
     document.getElementById(
         "fightButton"
     );
 
-
 const bagButton =
     document.getElementById(
         "bagButton"
     );
-
 
 const pokemonButton =
     document.getElementById(
         "pokemonButton"
     );
 
-
 const runButton =
     document.getElementById(
         "runButton"
     );
+
+
+/* =========================================================
+   CLIMA AUTOMÁTICO
+========================================================= */
+
+function setWeather(
+    type
+){
+
+    background.classList.remove(
+        "sunny",
+        "cloudy",
+        "rainy",
+        "night"
+    );
+
+
+    background.classList.add(
+        type
+    );
+
+
+    if(
+        type==="night"
+    ){
+
+        weatherText.textContent =
+            "🌙 NOCHE";
+
+        return;
+
+    }
+
+
+    if(
+        type==="rainy"
+    ){
+
+        weatherText.textContent =
+            "🌧️ LLUVIA";
+
+        return;
+
+    }
+
+
+    if(
+        type==="cloudy"
+    ){
+
+        weatherText.textContent =
+            "☁️ NUBLADO";
+
+        return;
+
+    }
+
+
+    weatherText.textContent =
+        "☀️ SOLEADO";
+
+}
+
+
+/*
+   Determina si actualmente
+   es noche.
+
+   19:00 - 06:00
+*/
+
+function isNight(){
+
+    const hour =
+        new Date().getHours();
+
+
+    return (
+        hour>=19 ||
+        hour<6
+    );
+
+}
+
+
+/*
+   Clima de respaldo.
+*/
+
+function fallbackWeather(){
+
+    if(
+        isNight()
+    ){
+
+        setWeather(
+            "night"
+        );
+
+    }
+
+    else{
+
+        setWeather(
+            "sunny"
+        );
+
+    }
+
+}
+
+
+/*
+   Consulta Open-Meteo.
+
+   WMO:
+
+   0,1       = soleado
+   2,3       = nublado
+   51-67     = lluvia
+   71-86     = nieve
+   80-82     = lluvia
+   95-99     = tormenta
+*/
+
+async function detectWeather(){
+
+    if(
+        isNight()
+    ){
+
+        setWeather(
+            "night"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const url =
+            "https://api.open-meteo.com/v1/forecast"
+            +
+            "?latitude="
+            +
+            WEATHER_LAT
+            +
+            "&longitude="
+            +
+            WEATHER_LON
+            +
+            "&current=weather_code"
+            +
+            "&timezone=auto";
+
+
+        const response =
+            await fetch(
+                url,
+                {
+                    cache:"no-store"
+                }
+            );
+
+
+        if(
+            !response.ok
+        ){
+
+            throw new Error(
+                "Weather API error"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const code =
+            data.current
+            &&
+            data.current.weather_code;
+
+
+        if(
+            code===0 ||
+            code===1
+        ){
+
+            setWeather(
+                "sunny"
+            );
+
+        }
+
+        else if(
+            code===2 ||
+            code===3
+        ){
+
+            setWeather(
+                "cloudy"
+            );
+
+        }
+
+        else if(
+            code>=51 &&
+            code<=99
+        ){
+
+            setWeather(
+                "rainy"
+            );
+
+        }
+
+        else{
+
+            setWeather(
+                "cloudy"
+            );
+
+        }
+
+    }
+
+    catch(error){
+
+        console.warn(
+            "No se pudo consultar el clima:",
+            error
+        );
+
+
+        fallbackWeather();
+
+    }
+
+}
+
+
+/*
+   Actualizar clima cada 10 minutos.
+*/
+
+detectWeather();
+
+
+setInterval(
+    detectWeather,
+    10*60*1000
+);
+
+
+/*
+   También comprobamos la hora
+   cada minuto para detectar
+   automáticamente cuando
+   comienza la noche.
+*/
+
+setInterval(
+    ()=>{
+
+        if(
+            isNight()
+        ){
+
+            setWeather(
+                "night"
+            );
+
+        }
+        else{
+
+            detectWeather();
+
+        }
+
+    },
+    60*1000
+);
 
 
 /* =========================================================
@@ -1413,7 +1945,7 @@ function setHpBar(
 
 
 /* =========================================================
-   ACTUALIZAR UI
+   UI
 ========================================================= */
 
 function updateUI(){
@@ -1421,10 +1953,8 @@ function updateUI(){
     enemyName.textContent =
         enemy.name;
 
-
     enemyLevel.textContent =
         enemy.level;
-
 
     enemyHpNumber.textContent =
         Math.max(
@@ -1447,10 +1977,8 @@ function updateUI(){
     playerName.textContent =
         player.name;
 
-
     playerLevel.textContent =
         player.level;
-
 
     playerHpNumber.textContent =
         Math.max(
@@ -1486,8 +2014,12 @@ function loadSprite(
     back=false
 ){
 
+    const base =
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
+
+
     img.src =
-        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
+        base
         +
         (
             back
@@ -1573,7 +2105,9 @@ async function newEnemy(){
 
 
     const pokemon =
-        await getPokemon(id);
+        await getPokemon(
+            id
+        );
 
 
     enemy={
@@ -1663,7 +2197,9 @@ async function initTeam(){
     ){
 
         team.push(
-            await getPokemon(id)
+            await getPokemon(
+                id
+            )
         );
 
     }
@@ -1760,13 +2296,11 @@ function addChat(
     row.innerHTML =
         '<span style="color:#63d9ff">@'
         +
-        user
+        escapeHtml(user)
         +
         "</span> "
         +
-        escapeHtml(
-            message
-        );
+        escapeHtml(message);
 
 
     chatFeed.prepend(
@@ -1877,7 +2411,6 @@ function highlightCommand(
 
     }
 
-
     else if(
         c==="!bag" ||
         c==="!item" ||
@@ -1891,7 +2424,6 @@ function highlightCommand(
 
     }
 
-
     else if(
         c==="!pokemon" ||
         c==="!poke"
@@ -1901,7 +2433,6 @@ function highlightCommand(
             pokemonButton;
 
     }
-
 
     else if(
         c==="!run" ||
@@ -2371,21 +2902,11 @@ function processCommand(
         .toLowerCase();
 
 
-    /*
-       MOSTRAR EL MENSAJE
-       REAL DEL CHAT
-    */
-
     addChat(
         user,
         message
     );
 
-
-    /*
-       SI NO ES COMANDO,
-       NO HACE NADA MÁS
-    */
 
     if(
         !command.startsWith("!")
@@ -2395,10 +2916,6 @@ function processCommand(
 
     }
 
-
-    /*
-       COOLDOWN
-    */
 
     const now =
         Date.now();
@@ -2418,10 +2935,6 @@ function processCommand(
         now;
 
 
-    /*
-       REGISTRAR JUGADOR
-    */
-
     users.add(
         user
     );
@@ -2431,18 +2944,10 @@ function processCommand(
         users.size;
 
 
-    /*
-       ILUMINAR BOTÓN
-    */
-
     highlightCommand(
         command
     );
 
-
-    /*
-       FIGHT
-    */
 
     if(
         command==="!fight" ||
@@ -2457,10 +2962,6 @@ function processCommand(
 
     }
 
-
-    /*
-       BAG
-    */
 
     if(
         command==="!bag" ||
@@ -2477,10 +2978,6 @@ function processCommand(
     }
 
 
-    /*
-       POKÉMON
-    */
-
     if(
         command==="!pokemon" ||
         command==="!poke"
@@ -2495,10 +2992,6 @@ function processCommand(
     }
 
 
-    /*
-       CATCH
-    */
-
     if(
         command==="!catch" ||
         command==="!pokeball"
@@ -2512,10 +3005,6 @@ function processCommand(
 
     }
 
-
-    /*
-       RUN
-    */
 
     if(
         command==="!run" ||
@@ -2546,10 +3035,8 @@ function connectTwitch(){
         connectionStatus.textContent =
             "● ERROR TMI.JS";
 
-
         connectionStatus.className =
             "error";
-
 
         return;
 
@@ -2582,7 +3069,6 @@ function connectTwitch(){
             connectionStatus.textContent =
                 "● CONECTANDO TWITCH...";
 
-
             connectionStatus.className =
                 "";
 
@@ -2596,7 +3082,6 @@ function connectTwitch(){
 
             connectionStatus.textContent =
                 "● TWITCH CONECTADO";
-
 
             connectionStatus.className =
                 "ok";
@@ -2620,7 +3105,6 @@ function connectTwitch(){
             connectionStatus.textContent =
                 "● TWITCH DESCONECTADO";
 
-
             connectionStatus.className =
                 "error";
 
@@ -2637,7 +3121,9 @@ function connectTwitch(){
             self
         )=>{
 
-            if(self){
+            if(
+                self
+            ){
 
                 return;
 
@@ -2674,7 +3160,6 @@ function connectTwitch(){
                 connectionStatus.textContent =
                     "● ERROR TWITCH";
 
-
                 connectionStatus.className =
                     "error";
 
@@ -2690,9 +3175,29 @@ function connectTwitch(){
 
 async function start(){
 
+    /*
+       Aplicamos un clima inicial
+       inmediatamente para que
+       nunca aparezca el fondo
+       vacío.
+    */
+
+    fallbackWeather();
+
+
+    /*
+       Cargamos Pokémon.
+    */
+
     await initTeam();
 
+
     await newEnemy();
+
+
+    /*
+       Finalmente conectamos Twitch.
+    */
 
     connectTwitch();
 
