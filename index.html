@@ -3048,50 +3048,104 @@ function processCommand(
 
 function connectTwitch(){
 
-    console.log(
-        "=============================="
-    );
+    const insideIframe = window.self !== window.top;
 
-    console.log(
-        "POKEMON TWITCH PLAYS"
-    );
+    console.log("=== TWITCH DEBUG ===");
+    console.log("URL:", window.location.href);
+    console.log("Dentro de iframe:", insideIframe);
+    console.log("Canal:", CHANNEL);
 
-    console.log(
-        "Canal:",
-        CHANNEL
-    );
+    const status = document.getElementById("connection-status");
 
-    console.log(
-        "TMI disponible:",
-        typeof tmi !== "undefined"
-    );
-
-    console.log(
-        "=============================="
-    );
-
-
-    connectionStatus.textContent =
-        "● CONECTANDO TWITCH...";
-
-    connectionStatus.className =
-        "";
-
-
-    if(
-        typeof tmi === "undefined"
-    ){
-
-        connectionStatus.textContent =
-            "● ERROR TMI.JS";
-
-        connectionStatus.className =
-            "error";
-
-        return;
-
+    if(status){
+        status.textContent = insideIframe
+            ? "CONECTANDO CHAT · IFRAME"
+            : "CONECTANDO CHAT";
     }
 
+    const client = new tmi.Client({
+        options: {
+            debug: true
+        },
+
+        connection: {
+            secure: true,
+            reconnect: true,
+            timeout: 20000
+        },
+
+        channels: [CHANNEL]
+    });
+
+    client.on("connecting", (address, port) => {
+        console.log("TMI connecting:", address, port);
+
+        if(status){
+            status.textContent = "CONECTANDO CHAT...";
+        }
+    });
+
+    client.on("connected", (address, port) => {
+        console.log("TMI CONNECTED:", address, port);
+
+        if(status){
+            status.textContent = "TWITCH CONECTADO";
+        }
+
+        addChatMessage(
+            "SYSTEM",
+            "Twitch conectado a #" + CHANNEL
+        );
+    });
+
+    client.on("disconnected", (reason) => {
+        console.error("TMI DISCONNECTED:", reason);
+
+        if(status){
+            status.textContent = "CHAT DESCONECTADO";
+        }
+    });
+
+    client.on("reconnect", () => {
+        console.log("TMI RECONNECT");
+        
+        if(status){
+            status.textContent = "RECONECTANDO CHAT...";
+        }
+    });
+
+    client.on("notice", (channel, msgid, message) => {
+        console.log("TMI NOTICE:", channel, msgid, message);
+    });
+
+    client.on("message", (channel, tags, message, self) => {
+
+        if(self) return;
+
+        console.log(
+            "CHAT:",
+            tags["display-name"] || tags.username,
+            message
+        );
+
+        handleTwitchCommand(
+            tags["display-name"] || tags.username,
+            message
+        );
+    });
+
+    client.connect()
+        .then(() => {
+            console.log("TMI connect() promise resolved");
+        })
+        .catch(error => {
+            console.error("TMI CONNECTION ERROR:", error);
+
+            if(status){
+                status.textContent = "ERROR TWITCH";
+            }
+        });
+}
 
     /*
        Crear conexión TMI.
